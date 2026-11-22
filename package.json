@@ -1,0 +1,69 @@
+{
+  "name": "thai-ocr-web",
+  "version": "0.1.0",
+  "description": "Thai + English printed-text OCR in the browser (WASM / WebGPU): a JavaScript port of OpenThai 2.1 OCR Text, identical output to the reference runtime",
+  "type": "module",
+  "license": "Apache-2.0",
+  "author": "Awirut",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/OWNER/thai-ocr-web.git"
+  },
+  "homepage": "https://github.com/OWNER/thai-ocr-web#readme",
+  "bugs": {
+    "url": "https://github.com/OWNER/thai-ocr-web/issues"
+  },
+  "keywords": [
+    "ocr",
+    "thai",
+    "thai-ocr",
+    "ocr-thai",
+    "browser",
+    "wasm",
+    "webgpu",
+    "onnxruntime-web",
+    "paddleocr",
+    "openthai",
+    "text-recognition"
+  ],
+  "exports": {
+    ".": {
+      "types": "./src/index.d.ts",
+      "default": "./src/index.js"
+    },
+    "./browser": {
+      "types": "./src/browser.d.ts",
+      "default": "./src/browser.js"
+    },
+    "./models/*": "./models/*"
+  },
+  "types": "./src/index.d.ts",
+  "files": [
+    "src",
+    "vendor/opencv/opencv-ocr.mjs",
+    "models",
+    "NOTICE"
+  ],
+  "sideEffects": false,
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "test": "node test/parity.mjs",
+    "dev": "node scripts/prepare-demo.mjs && vite",
+    "build": "node scripts/prepare-demo.mjs && vite build",
+    "preview": "vite preview",
+    "build:opencv": "bash vendor/opencv/build/build.sh"
+  },
+  "dependencies": {
+    "clipper-lib": "^6.4.2"
+  },
+  "peerDependencies": {
+    "onnxruntime-web": "^1.31.1"
+  },
+  "devDependencies": {
+    "onnxruntime-web": "^1.31.1",
+    "pngjs": "^7.0.0",
+    "vite": "^8.3.8"
+  }
+}

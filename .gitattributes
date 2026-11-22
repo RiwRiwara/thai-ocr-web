@@ -1,0 +1,3 @@
+*.onnx binary
+*.png binary
+vendor/opencv/opencv-ocr.mjs linguist-vendored -diff

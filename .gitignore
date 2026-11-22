@@ -1,0 +1,8 @@
+node_modules/
+dist/
+demo/public/models/
+demo/public/THIRD_PARTY_LICENSES.txt
+vendor/opencv/build/.build/
+.DS_Store
+*.log
+.vite/

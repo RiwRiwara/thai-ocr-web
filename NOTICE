@@ -1,0 +1,20 @@
+thai-ocr-web
+Copyright 2026 Awirut
+
+Unofficial JavaScript port; not affiliated with or endorsed by iApp Technology.
+
+src/line-ocr.js and src/thai-norm.js are a JavaScript port, with modifications, of runtime/line_engine.py and
+runtime/thai_norm.py from
+  OpenThai 2.1 OCR Text (iApp Technology), version 2.1.4
+  https://huggingface.co/iapp/OpenThai2.1-OCR-Text-20261118
+  Licensed under the Apache License, Version 2.0.
+
+models/ holds that repository's det.onnx, rec.onnx, rec2.onnx, det.yml, rec_dict.txt and config.json,
+unchanged, with its NOTICE (models/NOTICE), which credits PaddlePaddle PP-OCRv6-tiny (Apache-2.0).
+
+vendor/opencv/opencv-ocr.mjs is a build of OpenCV 5.0.0 (Apache License 2.0, Copyright the OpenCV team),
+compiled to WebAssembly from source in which modules/js/src/core_bindings.cpp has one added line
+(an empty namespace declaration); see vendor/opencv/build/build.sh.
+
+Runtime dependencies installed from npm: onnxruntime-web (MIT, Microsoft), clipper-lib (Boost Software
+License 1.0, Angus Johnson).

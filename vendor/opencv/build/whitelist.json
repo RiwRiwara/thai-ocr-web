@@ -1,0 +1,11 @@
+{
+  "core": { "whitelist": { "": ["copyMakeBorder", "rotate"] } },
+  "imgproc": {
+    "whitelist": {
+      "": [
+        "cvtColor", "fillPoly", "findContours", "getPerspectiveTransform", "getRotationMatrix2D",
+        "medianBlur", "minAreaRect", "resize", "warpAffine", "warpPerspective"
+      ]
+    }
+  }
+}

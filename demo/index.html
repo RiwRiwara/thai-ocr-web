@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>thai-ocr-web — Thai OCR in your browser</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ctext y=%22.9em%22 font-size=%2290%22%3E%E0%B8%81%3C/text%3E%3C/svg%3E" />
+  <style>
+    :root { font-family: system-ui, "Sarabun", sans-serif; color-scheme: light dark; }
+    body { margin: 0; padding: 24px; max-width: 1200px; margin-inline: auto; }
+    h1 { font-size: 20px; margin: 0 0 4px; }
+    .muted { opacity: .65; font-size: 13px; }
+    .bar { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin: 16px 0; }
+    #drop { border: 2px dashed #8886; border-radius: 10px; padding: 28px; text-align: center; cursor: pointer; }
+    #drop.over { background: #8882; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
+    canvas { width: 100%; height: auto; border: 1px solid #8884; border-radius: 6px; }
+    pre { white-space: pre-wrap; font: 15px/1.6 "Sarabun", system-ui, sans-serif; border: 1px solid #8884; border-radius: 6px; padding: 12px; margin: 0; min-height: 200px; }
+    table { border-collapse: collapse; font-size: 13px; width: 100%; margin-top: 12px; }
+    td, th { border-bottom: 1px solid #8883; padding: 3px 6px; text-align: left; }
+    .low { color: #c33; }
+    @media (max-width: 800px) { .grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <h1>Thai OCR that runs entirely in your browser</h1>
+  <div class="muted">Images never leave this device. Model: <a href="https://huggingface.co/iapp/OpenThai2.1-OCR-Text-20261118">OpenThai 2.1 OCR Text</a> by iApp Technology (Apache-2.0) · unofficial port · <a href="https://github.com/">source</a> · <a href="THIRD_PARTY_LICENSES.txt">licenses</a></div>
+  <div class="bar">
+    <label>Backend
+      <select id="ep"><option value="webgpu">WebGPU (fallback WASM)</option><option value="wasm">WASM</option></select>
+    </label>
+    <button id="load">Load model</button>
+    <span id="status" class="muted">not loaded</span>
+  </div>
+  <div id="drop">Drop an image here, paste one, or click to choose (PNG / JPG)<input id="file" type="file" accept="image/*" hidden /></div>
+  <div class="grid">
+    <canvas id="view"></canvas>
+    <div><pre id="text"></pre><button id="copy" style="margin-top:8px">Copy text</button></div>
+  </div>
+  <table id="lines"><thead><tr><th>#</th><th>row</th><th>confidence</th><th>text</th></tr></thead><tbody></tbody></table>
+  <script type="module" src="./main.js"></script>
+</body>
+</html>
