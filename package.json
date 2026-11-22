@@ -35,14 +35,16 @@
       "types": "./src/browser.d.ts",
       "default": "./src/browser.js"
     },
-    "./models/*": "./models/*"
+    "./models/*": "./models/*",
+    "./vendor/opencv/opencv-ocr.mjs": "./vendor/opencv/opencv-ocr.mjs"
   },
   "types": "./src/index.d.ts",
   "files": [
     "src",
     "vendor/opencv/opencv-ocr.mjs",
     "models",
-    "NOTICE"
+    "NOTICE",
+    "CHANGELOG.md"
   ],
   "sideEffects": false,
   "engines": {

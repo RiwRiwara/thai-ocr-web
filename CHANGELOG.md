@@ -1,0 +1,14 @@
+# Changelog
+
+## 0.1.0 — 2026-11-22
+
+First release.
+
+- JavaScript port of OpenThai 2.1 OCR Text's runtime (`line_engine.py` v2.1.4): detection, recognition, rec2 for
+  loopless fonts, orientation, deskew, column-aware reading order, floating marks, filters, Thai normalisation.
+- Output identical to the reference Python runtime on all 11 test pages (`npm test`, run in CI).
+- `createThaiOCR()` for the browser: WebGPU with WASM fallback, model caching, one WASM thread on iOS / iPadOS,
+  WebGPU runtime split into parts for hosts with a 25 MiB file limit.
+- Minimal OpenCV.js 5.0.0 build (0.77 MB gzip) with its build script; OpenCV starts on first use.
+- Demo site on Cloudflare Pages with sample pages, line boxes, copy and .txt download, light and dark themes.
+- Fixed: loading on iPhone (WebKit re-evaluating the worker module).
