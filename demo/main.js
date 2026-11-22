@@ -9,8 +9,6 @@ const T = {
   th: {
     docTitle: "อ่านข้อความภาษาไทยจากรูป ในเบราว์เซอร์ · thai-ocr-web",
     title: "อ่านข้อความภาษาไทยจากรูป ในเบราว์เซอร์",
-    chip1: "🔒 ทำงานในเครื่องคุณ ไม่อัปโหลด", chip2: "⚡ WebGPU หรือ WebAssembly",
-    chip3: "✓ ผลตรงกับ runtime ต้นฉบับ", chip4: "ภาษาไทย + English",
     engine: "ประมวลผลด้วย", load: "โหลดโมเดล",
     dropBig: "ลากรูปมาวาง วาง (paste) หรือคลิกเพื่อเลือกไฟล์",
     dropSmall: "PNG หรือ JPG · หน้าเอกสารที่สแกน รูปถ่ายเอกสาร หรือภาพหน้าจอ",
@@ -32,8 +30,6 @@ const T = {
   en: {
     docTitle: "Thai OCR in your browser · thai-ocr-web",
     title: "Thai OCR in your browser",
-    chip1: "🔒 Runs on your device, nothing uploaded", chip2: "⚡ WebGPU or WebAssembly",
-    chip3: "✓ Same output as the reference runtime", chip4: "ภาษาไทย + English",
     engine: "Run on", load: "Load model",
     dropBig: "Drop an image here, paste it, or click to choose",
     dropSmall: "PNG or JPG · a scanned page, a photo of a document, a screenshot",

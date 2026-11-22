@@ -23,15 +23,13 @@
     body { margin: 0; background: var(--bg); color: var(--ink); }
     a { color: var(--ink); }
     .wrap { max-width: 1180px; margin: 0 auto; padding: 28px 20px 48px; }
-    header { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    header { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 18px; }
     h1 { font-size: 22px; margin: 0; letter-spacing: -.01em; }
     .grow { flex: 1; }
     .btn { display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--line); background: var(--panel);
            color: var(--ink); padding: 8px 14px; border-radius: 10px; font: inherit; font-size: 14px; cursor: pointer; text-decoration: none; }
     .btn:hover { border-color: #a1a1aa; }
     .btn:disabled { color: var(--muted); cursor: default; }
-    .chips { display: flex; gap: 8px; flex-wrap: wrap; margin: 16px 0 18px; }
-    .chip { font-size: 13px; padding: 5px 11px; border-radius: 999px; background: var(--panel); border: 1px solid var(--line); color: #3f3f46; }
     .card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); }
     .bar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 12px 14px; }
     .label { font-size: 13px; color: var(--muted); }
@@ -94,13 +92,6 @@
         GitHub
       </a>
     </header>
-
-    <div class="chips">
-      <span class="chip" data-i18n="chip1">🔒 ทำงานในเครื่องคุณ ไม่อัปโหลด</span>
-      <span class="chip" data-i18n="chip2">⚡ WebGPU หรือ WebAssembly</span>
-      <span class="chip" data-i18n="chip3">✓ ผลตรงกับ runtime ต้นฉบับ</span>
-      <span class="chip" data-i18n="chip4">ภาษาไทย + English</span>
-    </div>
 
     <div class="card">
       <div class="bar">
