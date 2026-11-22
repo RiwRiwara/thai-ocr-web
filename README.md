@@ -7,13 +7,14 @@ WebGPU or WebAssembly · nothing is uploaded · works offline once loaded
 
 [![Live demo](https://img.shields.io/badge/▶_live_demo-thai--ocr--web.pages.dev-0f766e)](https://thai-ocr-web.pages.dev/)
 [![npm](https://img.shields.io/npm/v/thai-ocr-web?color=cb3837)](https://www.npmjs.com/package/thai-ocr-web)
+[![Hugging Face Space](https://img.shields.io/badge/🤗_Space-Riwara26%2Fthai--ocr--web-ffcc4d)](https://huggingface.co/spaces/Riwara26/thai-ocr-web)
 [![CI](https://github.com/RiwRiwara/thai-ocr-web/actions/workflows/ci.yml/badge.svg)](https://github.com/RiwRiwara/thai-ocr-web/actions/workflows/ci.yml)
 [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE)
 ![Models 6.6 MB](https://img.shields.io/badge/models-6.6_MB-555)
 
 <a href="https://thai-ocr-web.pages.dev/"><img src="docs/demo.gif" width="760" alt="The demo in Thai reading a government letter, a budget table, a two-column article and a loopless font with WebGPU, 0.1–0.7 s a page"></a>
 
-**[Try it now →](https://thai-ocr-web.pages.dev/)** &nbsp;·&nbsp; [ภาษาไทย](#ภาษาไทย)
+**[Try it now →](https://thai-ocr-web.pages.dev/)** &nbsp;·&nbsp; [on Hugging Face](https://huggingface.co/spaces/Riwara26/thai-ocr-web) &nbsp;·&nbsp; [ภาษาไทย](#ภาษาไทย)
 
 </div>
 
@@ -268,7 +269,7 @@ Apache-2.0 — see [LICENSE](LICENSE) and [NOTICE](NOTICE).
 พอร์ตโมเดล [OpenThai 2.1 OCR Text](https://huggingface.co/iapp/OpenThai2.1-OCR-Text-20261118) ของ iApp Technology
 (Apache-2.0) มาเป็น JavaScript ทั้ง pipeline ผลลัพธ์**ตรงกับ runtime Python ต้นฉบับทุกตัวอักษร**ในทุกหน้าทดสอบ (`npm test`)
 
-- **ลองเลย:** <https://thai-ocr-web.pages.dev/> — มีปุ่มตัวอย่างให้กดได้ทันที
+- **ลองเลย:** <https://thai-ocr-web.pages.dev/> หรือบน Hugging Face <https://huggingface.co/spaces/Riwara26/thai-ocr-web> — มีปุ่มตัวอย่างให้กดได้ทันที
 - **เร็ว:** ประมาณ 0.2–0.4 วินาที/หน้า ด้วย WebGPU บน Mac mini และใช้ WASM ได้ทุก browser รวม iPhone
 - **ครบ:** หมุนหน้า 90°/180°, แก้เอียง, อ่านทีละคอลัมน์, ฟอนต์ไม่มีหัว (Kanit/Prompt), วรรณยุกต์ลอยของหนังสือเก่า, ทศนิยมคอมมา, กรองตราประทับ
 - **PDF:** หน้าที่มีข้อความอยู่ในไฟล์แล้วดึงข้อความตรง ๆ หน้าที่เป็นภาพสแกนจะ OCR ให้ (`thai-ocr-web/pdf`)
