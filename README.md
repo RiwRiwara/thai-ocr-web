@@ -10,7 +10,7 @@ WebGPU or WebAssembly · nothing is uploaded · works offline once loaded
 [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE)
 ![Models 6.6 MB](https://img.shields.io/badge/models-6.6_MB-555)
 
-<a href="https://thai-ocr-web.pages.dev/"><img src="docs/demo.gif" width="760" alt="Reading a Thai government letter, a budget table and a two-column article in the browser, about 0.4 s a page"></a>
+<a href="https://thai-ocr-web.pages.dev/"><img src="docs/demo.gif" width="760" alt="The demo in Thai reading a government letter, a budget table, a two-column article and a loopless font with WebGPU, 0.1–0.7 s a page"></a>
 
 **[Try it now →](https://thai-ocr-web.pages.dev/)** &nbsp;·&nbsp; [ภาษาไทย](#ภาษาไทย)
 
