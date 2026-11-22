@@ -96,12 +96,27 @@ function textOf(content) {
   return canonical(out);
 }
 
-/** Share of characters that show a broken text layer: unmapped glyphs, or Thai marks without a base letter. */
-function brokenShare(text) {
+/**
+ * Share of characters that show a broken text layer. PDFs often map Thai glyphs (especially the shifted vowel and
+ * tone-mark forms some fonts use) back to the wrong code points, so the "text" is wrong although it looks like text:
+ * - unmapped glyphs: NUL, U+FFFD, private-use code points
+ * - Thai marks without a base letter / in an impossible order (invalidShare)
+ * - a symbol or Latin letter wedged between two Thai letters ("พ=ฒนา", "ด้<ย", "ใหZเ") — real Thai text has none
+ * - the obsolete letters ฃ ฅ, which mis-mapped fonts produce and modern documents do not use
+ * Exported for tests and for apps that extract text with pdf.js themselves.
+ */
+export function brokenShare(text) {
   const chars = [...text.replace(/\s/g, "")];
   if (!chars.length) return 1;
   const unmapped = chars.filter((c) => c === "\u0000" || c === "\uFFFD" || (c >= "\uE000" && c <= "\uF8FF")).length;
-  return Math.max(unmapped / chars.length, invalidShare(text));
+  const thai = chars.filter((c) => c >= "\u0E01" && c <= "\u0E5B").length;
+  let wedged = 0;
+  if (thai) {
+    const re = /[\u0E01-\u0E4E](?=[^\u0E00-\u0E7F\s0-9.,;:()\[\]\-\/'"%&+*!?…–—“”‘’·•][\u0E01-\u0E4E])/g;
+    wedged = (text.match(re) || []).length + (text.match(/[ฃฅ]/g) || []).length;
+  }
+  // a wedged symbol is a whole broken word: weight it, so a few per page are enough
+  return Math.max(unmapped / chars.length, invalidShare(text), thai ? (wedged * 5) / thai : 0);
 }
 
 /** True for a PDF file (by type, name or the %PDF magic bytes). */

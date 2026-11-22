@@ -3,7 +3,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { readPdf } from "../src/pdf.js";
+import { readPdf, brokenShare } from "../src/pdf.js";
 
 const root = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs"); // the legacy build runs in Node
@@ -28,4 +28,12 @@ try {
 const brokenOk = brokenSource === "ocr";
 ok = ok && brokenOk;
 console.log(`${brokenOk ? "PASS" : "FAIL"}  broken-text-layer.pdf page 1: ${brokenSource} (expected ocr)`);
+// Text layers whose Thai glyphs map to the wrong characters (seen in real PDFs) vs clean Thai text.
+const garbled = ["ออกแบบสถาปัตยกรรมและพ=ฒนา backend / API ของระบบ Conversational AI ด้<ย Go, Python และ NestJS",
+  "DXC Technology (โปรเจกต์ใหZเครุ(อ SCG), กรุงเทพฯ 2567 – 2568"];
+const clean = ["ใบแจ้งหนี้ เลขที่ INV-2569/0158 ค่าบริการ 12,500.00 บาท ภาษีมูลค่าเพิ่ม 7% (ก/ข) \"ทดสอบ\" ข้อ 1.2–1.3",
+  "พัฒนาระบบ AI ด้วย Go, Python และ NestJS ให้ลูกค้าในเครือ SCG กรุงเทพฯ ตั้งแต่ ม.ค. 2568 – ปัจจุบัน"];
+const shareOk = garbled.every((t) => brokenShare(t) > 0.01) && clean.every((t) => brokenShare(t) === 0);
+ok = ok && shareOk;
+console.log(`${shareOk ? "PASS" : "FAIL"}  brokenShare: garbled ${garbled.map((t) => brokenShare(t).toFixed(2))} · clean ${clean.map((t) => brokenShare(t).toFixed(2))}`);
 process.exit(ok ? 0 : 1);

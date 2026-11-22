@@ -1,6 +1,6 @@
 {
   "name": "thai-ocr-web",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Thai + English printed-text OCR in the browser (WebGPU / WASM), images and PDFs: a JavaScript port of OpenThai 2.1 OCR Text with output identical to the reference runtime",
   "type": "module",
   "license": "Apache-2.0",

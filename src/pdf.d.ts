@@ -40,4 +40,7 @@ export interface ReadPdfOptions {
 }
 
 export declare function readPdf(source: Blob | ArrayBuffer | Uint8Array, options: ReadPdfOptions): AsyncGenerator<PdfPage>;
+/** Share (0–1) of characters showing a broken text layer: unmapped glyphs, broken Thai mark order, symbols wedged between Thai letters. */
+export declare function brokenShare(text: string): number;
+
 export declare function isPdf(file: Blob & { name?: string }): Promise<boolean>;

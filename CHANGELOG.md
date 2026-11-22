@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.1 — 2026-11-22
+
+- PDF: detect text layers whose Thai glyphs map to the wrong characters (e.g. "พ=ฒนา", "ด้<ย") and read those pages
+  with OCR instead; `brokenShare()` is exported.
+
 ## 0.1.0 — 2026-11-22
 
 First release.
