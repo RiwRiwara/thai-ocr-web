@@ -17,6 +17,11 @@ export interface BrowserOptions {
   overrides?: ConfigOverrides;
   /** JSON listing parts of onnxruntime-web's .wasm, for hosts with a per-file size limit (see scripts/split-large-assets.mjs). */
   wasmManifestUrl?: string;
+  /** Cap on onnxruntime-web's WASM memory (MB). Default 512 on iPhone / iPad, where the 4 GB default fails. */
+  maxMemoryMB?: number;
 }
+
+/** Lower the maximum of shared WebAssembly.Memory created from now on (see maxMemoryMB). */
+export declare function capWasmMemory(maxMB: number): void;
 
 export declare function createThaiOCR(options?: BrowserOptions): Promise<LineOCR & { backend: "webgpu" | "wasm" }>;

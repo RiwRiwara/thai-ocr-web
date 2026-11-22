@@ -20,6 +20,7 @@ async function onMessage({ data }) {
       ocr = await createThaiOCR({
         backend: data.backend, threads, modelBaseUrl: data.modelBaseUrl,
         wasmManifestUrl: data.wasmManifestUrl, // present after `npm run build` (split for Cloudflare's 25 MiB limit)
+        maxMemoryMB: data.maxMemoryMB, // undefined: the library's default (512 MB on iPhone / iPad)
       });
       self.postMessage({ type: "ready", backend: ocr.backend, threads: self.crossOriginIsolated ? threads : 1, ms: performance.now() - t });
     } else if (data.type === "read") {

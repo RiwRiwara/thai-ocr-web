@@ -1,127 +1,131 @@
 <!doctype html>
-<html lang="en">
+<html lang="th">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <!-- GitHub Pages cannot send COOP/COEP headers; this service worker adds them so WASM can use threads.
        It does nothing when the host already sends them (Cloudflare Pages, Vite dev server). -->
   <script src="coi-serviceworker.min.js"></script>
-  <title>thai-ocr-web — Thai OCR in your browser</title>
+  <title>อ่านข้อความภาษาไทยจากรูป ในเบราว์เซอร์ · thai-ocr-web</title>
   <meta name="description" content="Read Thai and English text from document images entirely in your browser. WebGPU / WebAssembly, nothing is uploaded." />
   <meta property="og:title" content="thai-ocr-web — Thai OCR in your browser" />
   <meta property="og:description" content="Thai + English OCR that runs on your device with WebGPU or WebAssembly. Nothing is uploaded." />
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Crect width=%22100%22 height=%22100%22 rx=%2222%22 fill=%22%230f766e%22/%3E%3Ctext x=%2250%22 y=%2272%22 font-size=%2266%22 text-anchor=%22middle%22 fill=%22white%22%3E%E0%B8%81%3C/text%3E%3C/svg%3E" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Crect width=%22100%22 height=%22100%22 rx=%2222%22 fill=%22%2327272a%22/%3E%3Ctext x=%2250%22 y=%2272%22 font-size=%2266%22 text-anchor=%22middle%22 fill=%22white%22%3E%E0%B8%81%3C/text%3E%3C/svg%3E" />
   <style>
     :root {
-      --bg: #f6f7f9; --panel: #ffffff; --ink: #111827; --muted: #6b7280; --line: #e5e7eb;
-      --accent: #0f766e; --accent-ink: #ffffff; --accent-soft: #e6f4f2; --warn: #dc2626; --ok: #059669;
-      --radius: 14px; --shadow: 0 1px 2px rgba(0,0,0,.04), 0 4px 16px rgba(0,0,0,.05);
+      --bg: #f4f4f5; --panel: #ffffff; --ink: #18181b; --muted: #71717a; --line: #e4e4e7; --soft: #f4f4f5;
+      --strong: #27272a; --strong-ink: #ffffff; --warn: #dc2626; --ok: #16a34a;
+      --radius: 14px; --shadow: 0 1px 2px rgba(0,0,0,.04), 0 2px 10px rgba(0,0,0,.04);
       font-family: "Noto Sans Thai", "Sukhumvit Set", "Leelawadee UI", "Thonburi", system-ui, -apple-system, "Segoe UI", sans-serif;
-      color-scheme: light dark;
-    }
-    @media (prefers-color-scheme: dark) {
-      :root { --bg: #0b0f14; --panel: #121821; --ink: #e5e7eb; --muted: #94a3b8; --line: #1f2937;
-              --accent: #2dd4bf; --accent-ink: #042f2e; --accent-soft: #0f2a28; --shadow: none; }
+      color-scheme: light;
     }
     * { box-sizing: border-box; }
     body { margin: 0; background: var(--bg); color: var(--ink); }
-    a { color: var(--accent); }
+    a { color: var(--ink); }
     .wrap { max-width: 1180px; margin: 0 auto; padding: 28px 20px 48px; }
-    header { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
-    .logo { width: 44px; height: 44px; border-radius: 12px; background: var(--accent); color: var(--accent-ink);
-            display: grid; place-items: center; font-size: 28px; font-weight: 700; flex: none; }
+    header { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
     h1 { font-size: 22px; margin: 0; letter-spacing: -.01em; }
-    .sub { color: var(--muted); font-size: 14px; margin-top: 2px; }
     .grow { flex: 1; }
     .btn { display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--line); background: var(--panel);
            color: var(--ink); padding: 8px 14px; border-radius: 10px; font: inherit; font-size: 14px; cursor: pointer; text-decoration: none; }
-    .btn:hover { border-color: var(--accent); }
-    .btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
-    .chips { display: flex; gap: 8px; flex-wrap: wrap; margin: 18px 0 20px; }
-    .chip { font-size: 13px; padding: 5px 10px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); }
+    .btn:hover { border-color: #a1a1aa; }
+    .btn:disabled { color: var(--muted); cursor: default; }
+    .chips { display: flex; gap: 8px; flex-wrap: wrap; margin: 16px 0 18px; }
+    .chip { font-size: 13px; padding: 5px 11px; border-radius: 999px; background: var(--panel); border: 1px solid var(--line); color: #3f3f46; }
     .card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); }
     .bar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 12px 14px; }
-    .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
-    .seg label { padding: 7px 12px; font-size: 14px; cursor: pointer; }
-    .seg input { display: none; }
-    .seg input:checked + span { color: var(--accent); font-weight: 600; }
+    .label { font-size: 13px; color: var(--muted); }
+
+    /* segmented control: the selected option is a filled dark pill */
+    .seg { display: inline-flex; gap: 2px; padding: 3px; background: var(--soft); border: 1px solid var(--line); border-radius: 11px; }
+    .seg label { position: relative; cursor: pointer; }
+    .seg input { position: absolute; opacity: 0; pointer-events: none; }
+    .seg span { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 8px; font-size: 14px;
+                color: #52525b; transition: background .15s, color .15s, box-shadow .15s; }
+    .seg label:hover span { color: var(--ink); }
+    .seg input:checked + span { background: var(--strong); color: var(--strong-ink); box-shadow: 0 1px 3px rgba(0,0,0,.18); font-weight: 600; }
+    .seg input:focus-visible + span { outline: 2px solid #a1a1aa; outline-offset: 1px; }
+    .seg.small span { padding: 5px 11px; font-size: 13px; }
     #ep { display: none; }
+
     .status { font-size: 13px; color: var(--muted); display: inline-flex; align-items: center; gap: 8px; }
-    .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: #a1a1aa; flex: none; }
     .dot.busy { background: #f59e0b; animation: pulse 1s infinite; } .dot.ready { background: var(--ok); } .dot.err { background: var(--warn); }
     @keyframes pulse { 50% { opacity: .3; } }
-    #drop { margin-top: 14px; padding: 26px 20px; text-align: center; border: 2px dashed var(--line); cursor: pointer; transition: .15s; }
-    #drop:hover, #drop.over { border-color: var(--accent); background: var(--accent-soft); }
+    #drop { margin-top: 14px; padding: 26px 20px; text-align: center; border: 2px dashed #d4d4d8; cursor: pointer; transition: .15s; }
+    #drop:hover, #drop.over { border-color: #71717a; background: #fafafa; }
     #drop .big { font-size: 17px; font-weight: 600; }
     #drop .small { color: var(--muted); font-size: 13px; margin-top: 4px; }
     .samples { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 14px; }
-    .samples .btn { font-size: 13px; padding: 6px 10px; }
+    .samples .btn { font-size: 13px; padding: 6px 11px; }
     .result { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
-    .panel-h { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid var(--line); font-size: 14px; font-weight: 600; }
-    .panel-h .grow { flex: 1; }
+    .panel-h { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid var(--line); font-size: 14px; font-weight: 600; min-height: 52px; }
     .panel-b { padding: 12px; }
-    .stage { position: relative; background: repeating-conic-gradient(var(--line) 0 25%, transparent 0 50%) 0 0/16px 16px; border-radius: 8px; overflow: auto; max-height: 72vh; }
+    .stage { position: relative; background: repeating-conic-gradient(#f4f4f5 0 25%, transparent 0 50%) 0 0/16px 16px; border-radius: 8px; overflow: auto; max-height: 72vh; }
     canvas { display: block; width: 100%; height: auto; }
     #text { white-space: pre-wrap; font-family: inherit; font-size: 15.5px; line-height: 1.75; margin: 0; min-height: 280px; max-height: 72vh; overflow: auto; outline: none; }
-    #text:empty::before { content: "The text will appear here."; color: var(--muted); }
+    #text:empty::before { content: attr(data-empty); color: var(--muted); }
     .stats { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px; }
-    .stat { font-size: 13px; padding: 6px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); }
-    .stat b { font-variant-numeric: tabular-nums; }
+    .stat { font-size: 13px; padding: 6px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); color: #52525b; }
+    .stat b { color: var(--ink); font-variant-numeric: tabular-nums; }
     details { margin-top: 16px; } summary { cursor: pointer; padding: 12px 14px; font-size: 14px; font-weight: 600; }
     table { border-collapse: collapse; font-size: 13px; width: 100%; }
     td, th { border-top: 1px solid var(--line); padding: 6px 12px; text-align: left; vertical-align: top; }
     th { color: var(--muted); font-weight: 600; }
     td.num { font-variant-numeric: tabular-nums; } .low { color: var(--warn); }
     footer { margin-top: 32px; color: var(--muted); font-size: 13px; line-height: 1.7; }
-    .toggle { font-size: 13px; font-weight: 400; color: var(--muted); display: inline-flex; gap: 6px; align-items: center; }
+    footer a { color: #3f3f46; }
+    .toggle { font-size: 13px; font-weight: 400; color: var(--muted); display: inline-flex; gap: 6px; align-items: center; cursor: pointer; }
+    .toggle input { accent-color: var(--strong); }
     @media (max-width: 860px) { .result { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
   <div class="wrap">
     <header>
-      <div class="logo">ก</div>
-      <div>
-        <h1>Thai OCR in your browser</h1>
-        <div class="sub">Read Thai and English text from scans and photos — on your device, nothing is uploaded.</div>
-      </div>
+      <h1 data-i18n="title">อ่านข้อความภาษาไทยจากรูป ในเบราว์เซอร์</h1>
       <div class="grow"></div>
+      <div class="seg small" role="radiogroup" aria-label="Language">
+        <label><input type="radio" name="lang" value="th" /><span>ไทย</span></label>
+        <label><input type="radio" name="lang" value="en" /><span>EN</span></label>
+      </div>
       <a class="btn" href="https://github.com/RiwRiwara/thai-ocr-web" target="_blank" rel="noopener">
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.590.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
         GitHub
       </a>
     </header>
 
     <div class="chips">
-      <span class="chip">🔒 Runs on your device</span>
-      <span class="chip">⚡ WebGPU or WebAssembly</span>
-      <span class="chip">✓ Same output as the reference runtime</span>
-      <span class="chip">ภาษาไทย + English</span>
+      <span class="chip" data-i18n="chip1">🔒 ทำงานในเครื่องคุณ ไม่อัปโหลด</span>
+      <span class="chip" data-i18n="chip2">⚡ WebGPU หรือ WebAssembly</span>
+      <span class="chip" data-i18n="chip3">✓ ผลตรงกับ runtime ต้นฉบับ</span>
+      <span class="chip" data-i18n="chip4">ภาษาไทย + English</span>
     </div>
 
     <div class="card">
       <div class="bar">
+        <span class="label" data-i18n="engine">ประมวลผลด้วย</span>
         <div class="seg" role="radiogroup" aria-label="Backend">
           <label><input type="radio" name="backend" value="webgpu" checked /><span>WebGPU</span></label>
           <label><input type="radio" name="backend" value="wasm" /><span>WASM</span></label>
         </div>
         <select id="ep" aria-hidden="true"><option value="webgpu">webgpu</option><option value="wasm">wasm</option></select>
-        <button id="load" class="btn">Load model</button>
-        <span class="status"><span id="dot" class="dot"></span><span id="status">not loaded — the model (6.6 MB) loads when you pick an image</span></span>
+        <button id="load" class="btn" data-i18n="load">โหลดโมเดล</button>
+        <span class="status"><span id="dot" class="dot"></span><span id="status"></span></span>
       </div>
     </div>
 
     <div id="drop" class="card" tabindex="0">
-      <div class="big">Drop an image here, paste it, or click to choose</div>
-      <div class="small">PNG or JPG · a scanned page, a photo of a document, a screenshot</div>
+      <div class="big" data-i18n="dropBig">ลากรูปมาวาง วาง (paste) หรือคลิกเพื่อเลือกไฟล์</div>
+      <div class="small" data-i18n="dropSmall">PNG หรือ JPG · หน้าเอกสารที่สแกน รูปถ่ายเอกสาร หรือภาพหน้าจอ</div>
       <div class="samples" id="samples">
-        <span class="small" style="align-self:center">or try a sample:</span>
-        <button class="btn" data-sample="01_letter">หนังสือราชการ</button>
-        <button class="btn" data-sample="02_table">ตารางงบประมาณ</button>
-        <button class="btn" data-sample="03_kanit">ฟอนต์ไม่มีหัว</button>
-        <button class="btn" data-sample="04_columns">2 คอลัมน์</button>
-        <button class="btn" data-sample="05_tilted">หน้าเอียง</button>
-        <button class="btn" data-sample="08_upside">กลับหัว</button>
+        <span class="small" style="align-self:center" data-i18n="tryLabel">หรือลองตัวอย่าง:</span>
+        <button class="btn" data-sample="01_letter" data-i18n="s1">หนังสือราชการ</button>
+        <button class="btn" data-sample="02_table" data-i18n="s2">ตารางงบประมาณ</button>
+        <button class="btn" data-sample="03_kanit" data-i18n="s3">ฟอนต์ไม่มีหัว</button>
+        <button class="btn" data-sample="04_columns" data-i18n="s4">2 คอลัมน์</button>
+        <button class="btn" data-sample="05_tilted" data-i18n="s5">หน้าเอียง</button>
+        <button class="btn" data-sample="08_upside" data-i18n="s6">กลับหัว</button>
       </div>
       <input id="file" type="file" accept="image/*" hidden />
     </div>
@@ -130,26 +134,25 @@
 
     <div class="result">
       <div class="card">
-        <div class="panel-h">Image <span class="grow"></span>
-          <label class="toggle"><input type="checkbox" id="showBoxes" checked /> line boxes</label></div>
+        <div class="panel-h"><span data-i18n="image">รูปภาพ</span><span class="grow"></span>
+          <label class="toggle"><input type="checkbox" id="showBoxes" checked /> <span data-i18n="boxes">กรอบบรรทัด</span></label></div>
         <div class="panel-b"><div class="stage"><canvas id="view" width="10" height="10"></canvas></div></div>
       </div>
       <div class="card">
-        <div class="panel-h">Text <span class="grow"></span>
-          <button id="copy" class="btn">Copy</button><button id="download" class="btn">.txt</button></div>
-        <div class="panel-b"><pre id="text" contenteditable="plaintext-only" spellcheck="false"></pre></div>
+        <div class="panel-h"><span data-i18n="text">ข้อความ</span><span class="grow"></span>
+          <button id="copy" class="btn" data-i18n="copy">คัดลอก</button><button id="download" class="btn">.txt</button></div>
+        <div class="panel-b"><pre id="text" contenteditable="plaintext-only" spellcheck="false" data-empty="ข้อความจะแสดงที่นี่"></pre></div>
       </div>
     </div>
 
     <details class="card">
-      <summary>Lines and confidence</summary>
-      <table id="lines"><thead><tr><th>#</th><th>row</th><th>confidence</th><th>text</th></tr></thead><tbody></tbody></table>
+      <summary data-i18n="linesTitle">รายบรรทัดและความมั่นใจ</summary>
+      <table id="lines"><thead><tr><th>#</th><th data-i18n="colRow">แถว</th><th data-i18n="colConf">ความมั่นใจ</th><th data-i18n="colText">ข้อความ</th></tr></thead><tbody></tbody></table>
     </details>
 
     <footer>
-      Model: <a href="https://huggingface.co/iapp/OpenThai2.1-OCR-Text-20261118">OpenThai 2.1 OCR Text</a> by iApp Technology (Apache-2.0).
-      This page is an unofficial JavaScript port, not affiliated with iApp. Printed text only; handwriting and table structure are not supported.
-      · <a href="https://github.com/RiwRiwara/thai-ocr-web">Source</a> · <a href="THIRD_PARTY_LICENSES.txt">Licenses</a>
+      <span id="footerText"></span>
+      · <a href="https://github.com/RiwRiwara/thai-ocr-web" data-i18n="source">ซอร์สโค้ด</a> · <a href="THIRD_PARTY_LICENSES.txt" data-i18n="licenses">สัญญาอนุญาต</a>
     </footer>
   </div>
   <script type="module" src="./main.js"></script>

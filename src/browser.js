@@ -18,6 +18,9 @@ export const MODEL_FILES = ["det.yml", "config.json", "rec_dict.txt", "det.onnx"
  *   or 1 on iOS / iPadOS, where multi-threaded onnxruntime-web fails to create sessions.
  * @param {string|false} [o.cacheName]  Cache API bucket for the model files; false to skip caching.
  * @param {object} [o.overrides]  runtime config overrides, e.g. { join: { paragraphs: true } }.
+ * @param {number} [o.maxMemoryMB]  Cap on onnxruntime-web's WASM memory. Its runtime reserves a 4 GB shared memory
+ *   up front, which iOS refuses ("RangeError: Out of memory"); the default on iPhone / iPad is 512. The model needs
+ *   far less (all test pages read within 320 MB). Must be set before the first createThaiOCR in a worker.
  * @param {string} [o.wasmManifestUrl]  For hosts with a per-file size limit (Cloudflare: 25 MiB): a JSON file,
  *   as written by scripts/split-large-assets.mjs, listing the parts of onnxruntime-web's .wasm. The parts are
  *   joined here and handed to onnxruntime-web. A missing manifest (404) is ignored.
@@ -30,7 +33,9 @@ export async function createThaiOCR({
   cacheName = "thai-ocr-web-models-2.1.4",
   overrides = {},
   wasmManifestUrl,
+  maxMemoryMB = isAppleMobile() ? 512 : undefined,
 } = {}) {
+  if (maxMemoryMB) capWasmMemory(maxMemoryMB);
   // Only the chosen build is loaded: WASM ~15 MB (~4 MB gzip), WebGPU ~29 MB (~7 MB gzip).
   // Notes for Web Worker hosts (see demo/ocr.worker.js):
   // - onnxruntime-web starts its WASM threads from the chunk it was bundled into, and that chunk can import the
@@ -71,6 +76,27 @@ export async function createThaiOCR({
   }
   ocr.backend = used;
   return ocr;
+}
+
+/**
+ * Lower the maximum of every shared WebAssembly.Memory created from now on in this realm (worker or page).
+ * onnxruntime-web asks for { initial: 256, maximum: 65536 pages (4 GB), shared: true }; WebKit on iOS cannot reserve
+ * that much address space. A smaller maximum is still a valid import for the module (its limit is an upper bound).
+ */
+export function capWasmMemory(maxMB) {
+  const Memory = globalThis.WebAssembly?.Memory;
+  if (!Memory) return;
+  const maxPages = Math.max(1, Math.floor((maxMB * 1024 * 1024) / 65536));
+  const Original = Memory.__thaiOcrOriginal || Memory;
+  function CappedMemory(desc) {
+    if (desc && desc.shared && (desc.maximum === undefined || desc.maximum > maxPages)) {
+      desc = { ...desc, maximum: Math.max(maxPages, desc.initial || 0) };
+    }
+    return new Original(desc);
+  }
+  CappedMemory.prototype = Original.prototype;
+  CappedMemory.__thaiOcrOriginal = Original;
+  globalThis.WebAssembly.Memory = CappedMemory;
 }
 
 /** iPhone / iPad (every iOS browser is WebKit; iPadOS reports itself as a Mac with touch). */

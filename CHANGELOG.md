@@ -11,4 +11,6 @@ First release.
   WebGPU runtime split into parts for hosts with a 25 MiB file limit.
 - Minimal OpenCV.js 5.0.0 build (0.77 MB gzip) with its build script; OpenCV starts on first use.
 - Demo site on Cloudflare Pages with sample pages, line boxes, copy and .txt download, light and dark themes.
-- Fixed: loading on iPhone (WebKit re-evaluating the worker module).
+- Fixed: loading on iPhone — WebKit re-evaluating the worker module, and "RangeError: Out of memory" from ONNX
+  Runtime's 4 GB shared-memory reservation (capped at 512 MB on iOS, `maxMemoryMB`).
+- Demo in Thai (default) and English, light gray theme.

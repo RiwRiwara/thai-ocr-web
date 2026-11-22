@@ -60,7 +60,7 @@ Mac mini (Apple Silicon), Edge 154, the 11 test pages, warm:
 | **WebGPU** (Metal) | **200** | 118–379 |
 | WASM, 12 threads | 323 | 167–702 |
 | WASM, 4 threads (default) | 380 | 190–878 |
-| WASM, 1 thread (iPhone / iPad default) | 768 | 346–1891 |
+| WASM, 1 thread | 768 | 346–1891 |
 
 Pages that need turning take the upper end. The first page after loading WebGPU is slower (~1 s, shader compilation).
 **First load** (gzip): models 6.6 MB + OpenCV.js 0.77 MB + ONNX Runtime 3.9 MB (WASM) or 7.3 MB (WebGPU); cached after that.
@@ -118,18 +118,18 @@ const ocr = await LineOCR.create({
 | Browser | WebGPU | WASM | Checked |
 |---|---|---|---|
 | Chrome / Edge (desktop) | ✓ | ✓ multi-thread | Edge 154 on macOS, Chrome on Linux |
-| Safari / any browser on iPhone, iPad | — | ✓ one thread | WebKit with iPhone 15 Pro emulation |
+| Safari / any browser on iPhone, iPad | — | ✓ one thread, 512 MB | WebKit with iPhone 15 Pro emulation |
 | Firefox | Windows, Apple Silicon | ✓ | not yet |
 
-WebGPU availability varies by browser, OS and GPU; the library falls back to WASM on its own.
+WebGPU availability varies by browser, OS and GPU; the library falls back to WASM on its own. On iPhone and iPad it
+uses one thread and caps ONNX Runtime's WASM memory at 512 MB (`maxMemoryMB`): the runtime otherwise reserves 4 GB up
+front, which iOS refuses with "RangeError: Out of memory". All test pages read within 320 MB.
 
 ## How it works
 
-```
-image ─▶ detector (PP-OCRv6-tiny, DB) ─▶ text-line boxes ─▶ orientation + deskew
-      ─▶ line crops at 48 px, background flattened ─▶ recognizer (CTC) ─▶ rec2 for loopless fonts
-      ─▶ floating marks re-attached ─▶ reading order (rows, prose columns, lists) ─▶ filter ─▶ text
-```
+<p align="center"><img src="docs/architecture.svg" width="900" alt="Architecture: the page sends the image to a Web Worker where LineOCR runs with ONNX Runtime Web, OpenCV.js and the models; a static host only serves the files"></p>
+
+<p align="center"><img src="docs/pipeline.svg" width="900" alt="Pipeline: page image, detect lines, orient and deskew, cut and split lines, clean crops, recognize, rec2 re-read, floating marks, reading order, text and boxes"></p>
 
 | Path | What |
 |---|---|
@@ -140,6 +140,10 @@ image ─▶ detector (PP-OCRv6-tiny, DB) ─▶ text-line boxes ─▶ orientat
 | `models/` | OpenThai 2.1 OCR Text models (v2.1.4), unchanged |
 | `demo/` | the demo site (Vite) |
 | `test/` | test pages, the reference runtime's outputs, the parity test |
+
+## Faithful to the reference
+
+<p align="center"><img src="docs/parity.svg" width="900" alt="Parity: the 11 test pages go through the Python reference runtime once (golden output) and through thai-ocr-web on every push; CI fails unless the text is identical"></p>
 
 ## Development
 

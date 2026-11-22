@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 300" width="1000" height="300" font-family="Inter, -apple-system, 'Segoe UI', system-ui, sans-serif">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#374151"/>
+    </marker>
+    <style>
+      .t { font-size: 14.5px; font-weight: 650; fill: #111827; }
+      .s { font-size: 12px; fill: #4b5563; }
+      .m { font-size: 11.5px; fill: #374151; font-family: ui-monospace, Menlo, Consolas, monospace; }
+      .h { font-size: 12px; font-weight: 700; letter-spacing: .08em; fill: #374151; }
+      .box { fill: #ffffff; stroke: #d1d5db; stroke-width: 1.2; }
+      .key { fill: #f3f4f6; stroke: #374151; stroke-width: 1.4; }
+      .ln { stroke: #374151; stroke-width: 1.8; fill: none; marker-end: url(#a); }
+    </style>
+  </defs>
+  <rect x="0.5" y="0.5" width="999" height="299" rx="18" fill="#f8fafc" stroke="#e5e7eb"/>
+  <text x="32" y="40" class="h">HOW WE KNOW THE PORT IS FAITHFUL</text>
+
+  <g transform="translate(32,104)">
+    <rect class="box" width="170" height="100" rx="12"/>
+    <text x="16" y="32" class="t">11 test pages</text>
+    <text x="16" y="56" class="m">test/pages/*.png</text>
+    <text x="16" y="78" class="s">letters, tables, columns,</text>
+    <text x="16" y="92" class="s">tilted, upside down…</text>
+  </g>
+
+  <g transform="translate(262,60)">
+    <rect class="box" width="230" height="76" rx="12"/>
+    <text x="16" y="30" class="t">Reference runtime (Python)</text>
+    <text x="16" y="52" class="s">iApp line_engine.py v2.1.4, once</text>
+  </g>
+  <g transform="translate(262,176)">
+    <rect class="key" width="230" height="76" rx="12"/>
+    <text x="16" y="30" class="t">thai-ocr-web (JavaScript)</text>
+    <text x="16" y="52" class="s">WASM, on every push (CI)</text>
+  </g>
+  <path class="ln" d="M202,140 Q232,140 232,118 Q232,98 260,98"/>
+  <path class="ln" d="M202,168 Q232,168 232,190 Q232,214 260,214"/>
+
+  <g transform="translate(550,60)">
+    <rect class="box" width="170" height="76" rx="12"/>
+    <text x="16" y="30" class="t">Golden output</text>
+    <text x="16" y="52" class="m">test/golden/*.json</text>
+  </g>
+  <g transform="translate(550,176)">
+    <rect class="box" width="170" height="76" rx="12"/>
+    <text x="16" y="30" class="t">JS output</text>
+    <text x="16" y="52" class="s">text, lines, boxes</text>
+  </g>
+  <path class="ln" d="M492,98 H548"/>
+  <path class="ln" d="M492,214 H548"/>
+
+  <g transform="translate(780,104)">
+    <rect class="key" width="188" height="100" rx="12"/>
+    <text x="16" y="32" class="t">npm test · CI</text>
+    <text x="16" y="56" class="s">text identical? ✓ 11/11</text>
+    <text x="16" y="74" class="s">lines + rotation equal</text>
+    <text x="16" y="90" class="s">boxes within 1.7 px</text>
+  </g>
+  <path class="ln" d="M720,98 Q750,98 750,120 Q750,140 778,140"/>
+  <path class="ln" d="M720,214 Q750,214 750,192 Q750,168 778,168"/>
+
+  <text x="32" y="282" class="s">Checked the same way in Chrome and in WebKit (iPhone emulation). Any change that alters the text of a page fails the build.</text>
+</svg>
