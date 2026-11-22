@@ -9,7 +9,7 @@
     "type": "git",
     "url": "git+https://github.com/RiwRiwara/thai-ocr-web.git"
   },
-  "homepage": "https://riwriwara.github.io/thai-ocr-web/",
+  "homepage": "https://thai-ocr-web.pages.dev/",
   "bugs": {
     "url": "https://github.com/RiwRiwara/thai-ocr-web/issues"
   },
@@ -51,7 +51,7 @@
   "scripts": {
     "test": "node test/parity.mjs",
     "dev": "node scripts/prepare-demo.mjs && vite",
-    "build": "node scripts/prepare-demo.mjs && vite build",
+    "build": "node scripts/prepare-demo.mjs && vite build && node scripts/split-large-assets.mjs",
     "preview": "vite preview",
     "build:opencv": "bash vendor/opencv/build/build.sh"
   },

@@ -1,7 +1,7 @@
 # thai-ocr-web
 
-[![Live demo](https://img.shields.io/badge/demo-live-2ea44f)](https://riwriwara.github.io/thai-ocr-web/)
-[![Deploy](https://github.com/RiwRiwara/thai-ocr-web/actions/workflows/pages.yml/badge.svg)](https://github.com/RiwRiwara/thai-ocr-web/actions/workflows/pages.yml)
+[![Live demo](https://img.shields.io/badge/demo-live-2ea44f)](https://thai-ocr-web.pages.dev/)
+[![CI](https://github.com/RiwRiwara/thai-ocr-web/actions/workflows/ci.yml/badge.svg)](https://github.com/RiwRiwara/thai-ocr-web/actions/workflows/ci.yml)
 [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE)
 
 **Thai + English printed-text OCR that runs entirely in the browser** — WebGPU or WebAssembly, no server, the
@@ -12,7 +12,7 @@ iApp Technology: the 6.6 MB models run unchanged on [ONNX Runtime Web](https://o
 reference runtime (`line_engine.py` v2.1.4) is ported to JavaScript. **On every test page the output is identical,
 character for character, to the reference Python runtime.**
 
-**▶ Try it: <https://riwriwara.github.io/thai-ocr-web/>** — drop a photo or scan of a Thai document.
+**▶ Try it: <https://thai-ocr-web.pages.dev/>** — drop a photo or scan of a Thai document.
 
 > Unofficial port — not affiliated with or endorsed by iApp Technology.
 
@@ -66,8 +66,10 @@ Host `dist/` anywhere static. Multi-threaded WASM needs the page to be cross-ori
 the bundled [coi-serviceworker](https://github.com/gzuidhof/coi-serviceworker) adds them (the page reloads once on
 the first visit). Without isolation it still works, on one thread.
 
-Every push to `main` runs the parity test, builds the demo and deploys it to GitHub Pages
-(`.github/workflows/pages.yml`).
+The live demo is on Cloudflare Pages, connected to this repository: every push to `main` is built
+(`npm run build`) and deployed, and CI runs the parity test. Cloudflare limits a file to 25 MiB, so the build
+splits onnxruntime-web's ~29 MB WebGPU runtime into parts (`scripts/split-large-assets.mjs`) that the page joins
+again (`createThaiOCR({ wasmManifestUrl })`).
 
 ## Use it in your app
 
@@ -177,7 +179,7 @@ OCR ภาษาไทย + อังกฤษ (ตัวพิมพ์) ที
 
 - เร็ว: ~0.2 วินาที/หน้า (WebGPU) หรือ ~0.4 วินาที/หน้า (WASM) บน Mac mini
 - ครบ: หมุนหน้า 90°/180°, แก้เอียง, อ่านทีละคอลัมน์, ฟอนต์ไม่มีหัว (Kanit/Prompt), วรรณยุกต์ลอยของหนังสือเก่า, ทศนิยมคอมมา, กรองตราประทับ
-- ลองเลย: <https://riwriwara.github.io/thai-ocr-web/>
+- ลองเลย: <https://thai-ocr-web.pages.dev/>
 - ใช้: `npm install && npm run dev` สำหรับ demo หรือ `createThaiOCR()` จาก `thai-ocr-web/browser` ในแอปของคุณ
 - ข้อจำกัด: อ่านตัวพิมพ์เท่านั้น ไม่เก็บโครงสร้างตาราง ควรทดสอบกับเอกสารจริงของคุณก่อนใช้งาน
 

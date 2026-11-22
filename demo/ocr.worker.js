@@ -9,7 +9,10 @@ self.onmessage = async ({ data }) => {
   try {
     if (data.type === "init") {
       const t = performance.now();
-      ocr = await createThaiOCR({ backend: data.backend, threads: data.threads, modelBaseUrl: data.modelBaseUrl });
+      ocr = await createThaiOCR({
+        backend: data.backend, threads: data.threads, modelBaseUrl: data.modelBaseUrl,
+        wasmManifestUrl: data.wasmManifestUrl, // present after `npm run build` (split for Cloudflare's 25 MiB limit)
+      });
       const threads = self.crossOriginIsolated ? data.threads : 1;
       self.postMessage({ type: "ready", backend: ocr.backend, threads, ms: performance.now() - t });
     } else if (data.type === "read") {

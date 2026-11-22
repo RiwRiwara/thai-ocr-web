@@ -17,6 +17,9 @@ export const MODEL_FILES = ["det.yml", "config.json", "rec_dict.txt", "det.onnx"
  * @param {number} [o.threads]  WASM threads; only used when the page is cross-origin isolated. Default min(4, cores).
  * @param {string|false} [o.cacheName]  Cache API bucket for the model files; false to skip caching.
  * @param {object} [o.overrides]  runtime config overrides, e.g. { join: { paragraphs: true } }.
+ * @param {string} [o.wasmManifestUrl]  For hosts with a per-file size limit (Cloudflare: 25 MiB): a JSON file,
+ *   as written by scripts/split-large-assets.mjs, listing the parts of onnxruntime-web's .wasm. The parts are
+ *   joined here and handed to onnxruntime-web. A missing manifest (404) is ignored.
  * @returns {Promise<LineOCR & { backend: "webgpu"|"wasm" }>}
  */
 export async function createThaiOCR({
@@ -25,6 +28,7 @@ export async function createThaiOCR({
   threads = Math.min(4, globalThis.navigator?.hardwareConcurrency || 1),
   cacheName = "thai-ocr-web-models-2.1.4",
   overrides = {},
+  wasmManifestUrl,
 } = {}) {
   // Only the chosen build is downloaded: WASM ~15 MB (~4 MB gzip), WebGPU ~29 MB (~7 MB gzip).
   const ort = backend === "webgpu" ? await import("onnxruntime-web/webgpu") : await import("onnxruntime-web/wasm");
@@ -42,6 +46,10 @@ export async function createThaiOCR({
     }
     return new Uint8Array(await res.arrayBuffer());
   };
+  if (wasmManifestUrl) {
+    const binary = await joinedWasm(new URL(wasmManifestUrl, globalThis.location?.href).href, backend, cache);
+    if (binary) ort.env.wasm.wasmBinary = binary;
+  }
   const make = (eps) => LineOCR.create({ ort, cv, ClipperLib, loadFile, executionProviders: eps, overrides });
   let ocr, used = backend;
   if (backend === "webgpu") {
@@ -57,6 +65,29 @@ export async function createThaiOCR({
   }
   ocr.backend = used;
   return ocr;
+}
+
+async function joinedWasm(manifestUrl, backend, cache) {
+  const res = await fetch(manifestUrl).catch(() => null);
+  if (!res || !res.ok) return null;
+  const entry = (await res.json())[backend];
+  if (!entry) return null;
+  const out = new Uint8Array(entry.size);
+  let off = 0;
+  for (const part of entry.parts) {
+    const url = new URL(part, manifestUrl).href;
+    let r = cache && (await cache.match(url));
+    if (!r) {
+      r = await fetch(url);
+      if (!r.ok) throw new Error(`thai-ocr-web: cannot load ${url} (${r.status})`);
+      if (cache) await cache.put(url, r.clone());
+    }
+    const b = new Uint8Array(await r.arrayBuffer());
+    out.set(b, off);
+    off += b.length;
+  }
+  if (off !== entry.size) throw new Error("thai-ocr-web: wasm parts do not add up");
+  return out.buffer;
 }
 
 export { LineOCR };

@@ -13,6 +13,8 @@ export interface BrowserOptions {
   /** Cache API bucket for the model files; false to skip caching. */
   cacheName?: string | false;
   overrides?: ConfigOverrides;
+  /** JSON listing parts of onnxruntime-web's .wasm, for hosts with a per-file size limit (see scripts/split-large-assets.mjs). */
+  wasmManifestUrl?: string;
 }
 
 export declare function createThaiOCR(options?: BrowserOptions): Promise<LineOCR & { backend: "webgpu" | "wasm" }>;

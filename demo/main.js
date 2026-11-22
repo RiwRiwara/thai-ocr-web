@@ -28,6 +28,7 @@ function load() {
     threads: Number(q.get("threads")) || Math.min(4, navigator.hardwareConcurrency || 1),
     // a worker's own URL sits under assets/, so resolve the model folder against the page
     modelBaseUrl: new URL(import.meta.env.BASE_URL + "models/", location.href).href,
+    wasmManifestUrl: import.meta.env.PROD ? new URL(import.meta.env.BASE_URL + "ort-wasm-manifest.json", location.href).href : undefined,
   });
   return promise;
 }
