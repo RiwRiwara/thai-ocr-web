@@ -36,6 +36,25 @@ is identical, character for character, to the reference Python runtime**, and CI
   and a filter for stamps and signatures — with a box and a confidence for every line.
 - **Small.** 6.6 MB of models and a custom OpenCV.js build of 0.77 MB (gzip), 5× smaller than the stock one.
 
+## What you can build with it
+
+- **Private document intake.** Read ID cards, contracts, bank statements or medical letters in the user's own browser.
+  The file never reaches your server, which helps with PDPA and internal data rules (banks, hospitals, government).
+- **Fill a form from a photo.** OCR an invoice, receipt or application form, then pick out the fields (tax ID, dates,
+  amounts) with your own rules or an LLM. Each line comes with a box and a confidence, so low-confidence fields can be
+  sent to a person to check.
+- **Cheaper, safer LLM pipelines.** Read the page locally and send the LLM text instead of an image: fewer tokens, and
+  you can remove personal data before anything leaves the device.
+- **Search old scans.** Turn a folder of scanned PDFs (theses, court papers, archives) into searchable text, page by
+  page, with no OCR server to run or pay for.
+- **Offline field apps.** A PWA for inspectors, logistics or clinics keeps working without a signal once the models
+  are cached.
+- **Browser extensions and accessibility.** Copy Thai text out of screenshots and images on any page, or read it out
+  for screen-reader users.
+- **Server side too.** The core API runs in Node (the parity test does), for batch jobs on a machine you already have.
+
+Printed text only: handwriting needs a different model, and tables come out as text row by row.
+
 ## How it compares
 
 Character accuracy (100 × (1 − CER)), average of 12 printed Thai sets, from
@@ -255,6 +274,9 @@ Apache-2.0 — see [LICENSE](LICENSE) and [NOTICE](NOTICE).
 - **PDF:** หน้าที่มีข้อความอยู่ในไฟล์แล้วดึงข้อความตรง ๆ หน้าที่เป็นภาพสแกนจะ OCR ให้ (`thai-ocr-web/pdf`)
 - **ใช้ในแอป:** `npm install thai-ocr-web onnxruntime-web` แล้วใช้ `createThaiOCR()` จาก `thai-ocr-web/browser` (ดูตัวอย่างด้านบน)
 - **ใช้แค่ไฟล์โมเดลได้ไหม:** ได้ แต่ไฟล์ `.onnx` ให้ผลเป็นตัวเลขดิบ ต้องมีขั้นตอนก่อนและหลัง (หาบรรทัด ตัดภาพ ถอดรหัส CTC เรียงลำดับการอ่าน) ซึ่งก็คือสิ่งที่แพ็กเกจนี้ทำ
+- **เอาไปทำอะไรได้:** รับเอกสารลูกค้าแบบไฟล์ไม่ออกจากเครื่อง (บัตรประชาชน สัญญา statement) · กรอกฟอร์มจากรูปใบแจ้งหนี้หรือใบเสร็จ ·
+  OCR ในเครื่องก่อนแล้วส่งแค่ข้อความให้ LLM (ถูกกว่าและตัดข้อมูลส่วนตัวออกได้) · ทำให้ PDF สแกนเก่าค้นหาได้ · แอปภาคสนามที่ใช้ offline ·
+  extension คัดลอกข้อความไทยจากรูป · งาน batch ฝั่ง Node
 - **ข้อจำกัด:** อ่านตัวพิมพ์เท่านั้น ไม่เก็บโครงสร้างตาราง ควรทดสอบกับเอกสารจริงของคุณก่อนใช้งาน
 
 เป็นงานพอร์ตอิสระ ไม่ได้เกี่ยวข้องหรือได้รับการรับรองจาก iApp Technology
