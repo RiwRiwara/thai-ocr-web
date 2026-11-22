@@ -1,7 +1,7 @@
 {
   "name": "thai-ocr-web",
   "version": "0.1.0",
-  "description": "Thai + English printed-text OCR in the browser (WASM / WebGPU): a JavaScript port of OpenThai 2.1 OCR Text, identical output to the reference runtime",
+  "description": "Thai + English printed-text OCR in the browser (WebGPU / WASM), images and PDFs: a JavaScript port of OpenThai 2.1 OCR Text with output identical to the reference runtime",
   "type": "module",
   "license": "Apache-2.0",
   "author": "Awirut",
@@ -24,7 +24,9 @@
     "onnxruntime-web",
     "paddleocr",
     "openthai",
-    "text-recognition"
+    "text-recognition",
+    "pdf",
+    "pdfjs"
   ],
   "exports": {
     ".": {
@@ -35,8 +37,13 @@
       "types": "./src/browser.d.ts",
       "default": "./src/browser.js"
     },
+    "./pdf": {
+      "types": "./src/pdf.d.ts",
+      "default": "./src/pdf.js"
+    },
     "./models/*": "./models/*",
-    "./vendor/opencv/opencv-ocr.mjs": "./vendor/opencv/opencv-ocr.mjs"
+    "./vendor/opencv/opencv-ocr.mjs": "./vendor/opencv/opencv-ocr.mjs",
+    "./package.json": "./package.json"
   },
   "types": "./src/index.d.ts",
   "files": [
@@ -51,7 +58,7 @@
     "node": ">=20"
   },
   "scripts": {
-    "test": "node test/parity.mjs",
+    "test": "node test/parity.mjs && node test/pdf.mjs",
     "dev": "node scripts/prepare-demo.mjs && vite",
     "build": "node scripts/prepare-demo.mjs && vite build && node scripts/split-large-assets.mjs",
     "preview": "vite preview",
@@ -61,11 +68,18 @@
     "clipper-lib": "^6.4.2"
   },
   "peerDependencies": {
-    "onnxruntime-web": "^1.31.1"
+    "onnxruntime-web": "^1.31.1",
+    "pdfjs-dist": ">=5"
+  },
+  "peerDependenciesMeta": {
+    "pdfjs-dist": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "coi-serviceworker": "^0.1.7",
     "onnxruntime-web": "^1.31.1",
+    "pdfjs-dist": "^6.5.438",
     "pngjs": "^7.0.0",
     "vite": "^8.3.8"
   }

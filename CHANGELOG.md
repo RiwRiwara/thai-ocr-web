@@ -10,7 +10,9 @@ First release.
 - `createThaiOCR()` for the browser: WebGPU with WASM fallback, model caching, one WASM thread on iOS / iPadOS,
   WebGPU runtime split into parts for hosts with a 25 MiB file limit.
 - Minimal OpenCV.js 5.0.0 build (0.77 MB gzip) with its build script; OpenCV starts on first use.
-- Demo site on Cloudflare Pages with sample pages, line boxes, copy and .txt download, light and dark themes.
+- Demo site on Cloudflare Pages with sample pages, line boxes, copy and .txt download, light theme.
 - Fixed: loading on iPhone — WebKit re-evaluating the worker module, and "RangeError: Out of memory" from ONNX
   Runtime's 4 GB shared-memory reservation (capped at 512 MB on iOS, `maxMemoryMB`).
+- PDF input (`thai-ocr-web/pdf`, pdf.js as an optional peer dependency): a page's own text where it has a usable
+  text layer, OCR for scanned pages; progress, page limit, abort. The demo opens PDFs, with a page pager.
 - Demo in Thai (default) and English, light gray theme.

@@ -75,6 +75,10 @@
     footer a { color: #3f3f46; }
     .toggle { font-size: 13px; font-weight: 400; color: var(--muted); display: inline-flex; gap: 6px; align-items: center; cursor: pointer; }
     .toggle input { accent-color: var(--strong); }
+    .pager { display: inline-flex; align-items: center; gap: 6px; font-weight: 400; font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+    .pager .btn { padding: 3px 10px; font-size: 15px; line-height: 1; }
+    .note { font-size: 13px; color: var(--muted); align-self: center; }
+    .samples .toggle { margin-left: 6px; }
     @media (max-width: 860px) { .result { grid-template-columns: 1fr; } }
   </style>
 </head>
@@ -107,8 +111,8 @@
     </div>
 
     <div id="drop" class="card" tabindex="0">
-      <div class="big" data-i18n="dropBig">ลากรูปมาวาง วาง (paste) หรือคลิกเพื่อเลือกไฟล์</div>
-      <div class="small" data-i18n="dropSmall">PNG หรือ JPG · หน้าเอกสารที่สแกน รูปถ่ายเอกสาร หรือภาพหน้าจอ</div>
+      <div class="big" data-i18n="dropBig">ลากรูปหรือ PDF มาวาง วาง (paste) หรือคลิกเพื่อเลือกไฟล์</div>
+      <div class="small" data-i18n="dropSmall">PNG, JPG หรือ PDF · หน้าเอกสารที่สแกน รูปถ่ายเอกสาร หรือภาพหน้าจอ</div>
       <div class="samples" id="samples">
         <span class="small" style="align-self:center" data-i18n="tryLabel">หรือลองตัวอย่าง:</span>
         <button class="btn" data-sample="01_letter" data-i18n="s1">หนังสือราชการ</button>
@@ -117,15 +121,19 @@
         <button class="btn" data-sample="04_columns" data-i18n="s4">2 คอลัมน์</button>
         <button class="btn" data-sample="05_tilted" data-i18n="s5">หน้าเอียง</button>
         <button class="btn" data-sample="08_upside" data-i18n="s6">กลับหัว</button>
+        <button class="btn" data-sample="sample.pdf" data-i18n="s7">PDF 3 หน้า</button>
+        <label class="toggle"><input type="checkbox" id="ocrAll" /> <span data-i18n="ocrAll">OCR ทุกหน้าของ PDF</span></label>
       </div>
-      <input id="file" type="file" accept="image/*" hidden />
+      <input id="file" type="file" accept="image/*,application/pdf,.pdf" hidden />
     </div>
 
     <div class="stats" id="stats" hidden></div>
 
     <div class="result">
       <div class="card">
-        <div class="panel-h"><span data-i18n="image">รูปภาพ</span><span class="grow"></span>
+        <div class="panel-h"><span data-i18n="image">รูปภาพ</span>
+          <span class="pager" id="pager" hidden><button id="prev" class="btn" aria-label="previous page">‹</button><span id="pageNo">1 / 1</span><button id="next" class="btn" aria-label="next page">›</button></span>
+          <span class="grow"></span>
           <label class="toggle"><input type="checkbox" id="showBoxes" checked /> <span data-i18n="boxes">กรอบบรรทัด</span></label></div>
         <div class="panel-b"><div class="stage"><canvas id="view" width="10" height="10"></canvas></div></div>
       </div>

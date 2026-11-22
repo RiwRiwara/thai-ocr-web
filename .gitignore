@@ -8,3 +8,4 @@ vendor/opencv/build/.build/
 .vite/
 demo/public/coi-serviceworker.min.js
 demo/public/samples/
+demo/public/pdfjs

@@ -2,10 +2,11 @@
 
 # thai-ocr-web
 
-**Thai + English OCR that runs entirely in your browser.**<br>
+**Thai + English OCR that runs entirely in your browser — images and PDFs.**<br>
 WebGPU or WebAssembly · nothing is uploaded · works offline once loaded
 
 [![Live demo](https://img.shields.io/badge/▶_live_demo-thai--ocr--web.pages.dev-0f766e)](https://thai-ocr-web.pages.dev/)
+[![npm](https://img.shields.io/npm/v/thai-ocr-web?color=cb3837)](https://www.npmjs.com/package/thai-ocr-web)
 [![CI](https://github.com/RiwRiwara/thai-ocr-web/actions/workflows/ci.yml/badge.svg)](https://github.com/RiwRiwara/thai-ocr-web/actions/workflows/ci.yml)
 [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE)
 ![Models 6.6 MB](https://img.shields.io/badge/models-6.6_MB-555)
@@ -70,7 +71,7 @@ Pages that need turning take the upper end. The first page after loading WebGPU 
 ### In the browser
 
 ```bash
-npm install github:RiwRiwara/thai-ocr-web onnxruntime-web
+npm install thai-ocr-web onnxruntime-web
 ```
 
 Serve the files in `node_modules/thai-ocr-web/models/` from your site (e.g. copy them to `public/models/`), then:
@@ -94,6 +95,30 @@ Run it in a Web Worker to keep the page responsive — copy [`demo/ocr.worker.js
 two guards a worker needs for WebKit and for ONNX Runtime's thread workers). For multi-threaded WASM, serve the page
 with `Cross-Origin-Opener-Policy: same-origin` and `Cross-Origin-Embedder-Policy: require-corp`; without them it runs
 on one thread.
+
+### PDFs
+
+Install [pdf.js](https://github.com/mozilla/pdf.js) as well (`npm install pdfjs-dist`). `readPdf` goes through the
+pages one by one: a page that already carries text (a PDF exported from Word, a page saved as PDF) gives that text
+directly — exact and instant — and a scanned page is rendered and read with OCR.
+
+```js
+import { readPdf } from "thai-ocr-web/pdf";
+import workerSrc from "pdfjs-dist/build/pdf.worker.min.mjs?url";   // Vite; any URL of pdf.worker.min.mjs works
+
+for await (const page of readPdf(file, { read: (image) => ocr.read(image), workerSrc })) {
+  page.pageNumber;   // 1, 2, …
+  page.source;       // "text-layer" (the PDF's own text) or "ocr"
+  page.text;
+  page.result;       // the full OCR result for "ocr" pages
+}
+```
+
+Options: `useTextLayer: false` OCRs every page; `maxPages`, `signal` (AbortSignal), `onPage` for progress,
+`targetLongSide` (render size, default 2200 px), and `documentOptions` for pdf.js — for scanned PDFs with JBIG2 or
+JPEG 2000 images, and for PDFs without embedded fonts, serve pdf.js's `wasm/`, `cmaps/` and `standard_fonts/` folders
+and pass `{ wasmUrl, cMapUrl, cMapPacked: true, standardFontDataUrl }` (the demo does this). A text layer whose Thai
+characters did not survive (unmapped glyphs, broken mark order) is not trusted: that page is OCR'd instead.
 
 ### Core API (any JavaScript runtime)
 
@@ -136,6 +161,7 @@ front, which iOS refuses with "RangeError: Out of memory". All test pages read w
 | `src/line-ocr.js` | the runtime: detection, recognition, orientation, reading order, filters |
 | `src/thai-norm.js` | Thai canonical form (mark order, sara am, legacy code points) |
 | `src/browser.js` | `createThaiOCR()`: loads ONNX Runtime Web, OpenCV.js and the models (cached) |
+| `src/pdf.js` | `readPdf()`: a PDF's own text where it has one, OCR for scanned pages (pdf.js) |
 | `vendor/opencv/` | the minimal OpenCV.js build and the script that rebuilds it |
 | `models/` | OpenThai 2.1 OCR Text models (v2.1.4), unchanged |
 | `demo/` | the demo site (Vite) |
@@ -150,7 +176,7 @@ front, which iOS refuses with "RangeError: Out of memory". All test pages read w
 ```bash
 npm install
 npm run dev        # demo at http://localhost:5173
-npm test           # parity with the reference runtime (11 pages, ONNX Runtime Web WASM in Node)
+npm test           # parity with the reference runtime (11 pages, ONNX Runtime Web WASM in Node) + PDF text layer
 npm run build      # static site in dist/
 ```
 
@@ -181,13 +207,18 @@ OpenCV's own build tool is a Python script, so this step needs Python 3 and CMak
 **Is anything uploaded?** No. The page downloads the models once; the image is read on your device.<br>
 **Does it read handwriting?** No — printed text only. Handwritten parts of a page are left out.<br>
 **Tables?** Cells are read row by row as text; table structure is not kept (iApp's OCR Markdown model does that).<br>
-**PDFs?** Not yet — render the page to an image first (e.g. with pdf.js). Built-in PDF support is on the roadmap.<br>
+**PDFs?** Yes — `thai-ocr-web/pdf` (see [PDFs](#pdfs)); the demo opens them too.<br>
+**Can I use only the `.onnx` files?** You can, but on their own they give raw tensors: a probability map and per-position
+character scores. Turning that into text is the work this package does — finding lines (DB post-processing, Clipper),
+cutting and straightening crops, CTC decoding, the second recogniser for loopless fonts, orientation, reading order and
+filters. Use the package, or [`src/line-ocr.js`](src/line-ocr.js) as the reference if you port it elsewhere.<br>
 **Why is my first page slower?** Model and runtime download (cached afterwards) and, with WebGPU, shader compilation.
 
 ## Roadmap
 
-- [ ] PDF input (pdf.js) and searchable-PDF output
-- [ ] npm package
+- [x] PDF input (pdf.js)
+- [x] npm package
+- [ ] Searchable-PDF output (text layer over scanned pages)
 - [ ] Word boxes (the reference runtime's `words`)
 - [ ] Several workers for batches of pages
 - [ ] More real-world test pages
@@ -206,7 +237,8 @@ Apache-2.0 — see [LICENSE](LICENSE) and [NOTICE](NOTICE).
 - Models and reference runtime: [OpenThai 2.1 OCR Text](https://huggingface.co/iapp/OpenThai2.1-OCR-Text-20261118),
   iApp Technology (Apache-2.0), built on PaddlePaddle PP-OCRv6-tiny (Apache-2.0).
 - [OpenCV](https://opencv.org/) (Apache-2.0), [ONNX Runtime Web](https://onnxruntime.ai/) (MIT),
-  [Clipper](https://www.npmjs.com/package/clipper-lib) (Boost), [coi-serviceworker](https://github.com/gzuidhof/coi-serviceworker) (MIT, demo only).
+  [Clipper](https://www.npmjs.com/package/clipper-lib) (Boost), [pdf.js](https://github.com/mozilla/pdf.js) (Apache-2.0, optional),
+  [coi-serviceworker](https://github.com/gzuidhof/coi-serviceworker) (MIT, demo only).
 
 ---
 
@@ -220,7 +252,9 @@ Apache-2.0 — see [LICENSE](LICENSE) and [NOTICE](NOTICE).
 - **ลองเลย:** <https://thai-ocr-web.pages.dev/> — มีปุ่มตัวอย่างให้กดได้ทันที
 - **เร็ว:** ประมาณ 0.2–0.4 วินาที/หน้า ด้วย WebGPU บน Mac mini และใช้ WASM ได้ทุก browser รวม iPhone
 - **ครบ:** หมุนหน้า 90°/180°, แก้เอียง, อ่านทีละคอลัมน์, ฟอนต์ไม่มีหัว (Kanit/Prompt), วรรณยุกต์ลอยของหนังสือเก่า, ทศนิยมคอมมา, กรองตราประทับ
-- **ใช้ในแอป:** `createThaiOCR()` จาก `thai-ocr-web/browser` (ดูตัวอย่างด้านบน)
+- **PDF:** หน้าที่มีข้อความอยู่ในไฟล์แล้วดึงข้อความตรง ๆ หน้าที่เป็นภาพสแกนจะ OCR ให้ (`thai-ocr-web/pdf`)
+- **ใช้ในแอป:** `npm install thai-ocr-web onnxruntime-web` แล้วใช้ `createThaiOCR()` จาก `thai-ocr-web/browser` (ดูตัวอย่างด้านบน)
+- **ใช้แค่ไฟล์โมเดลได้ไหม:** ได้ แต่ไฟล์ `.onnx` ให้ผลเป็นตัวเลขดิบ ต้องมีขั้นตอนก่อนและหลัง (หาบรรทัด ตัดภาพ ถอดรหัส CTC เรียงลำดับการอ่าน) ซึ่งก็คือสิ่งที่แพ็กเกจนี้ทำ
 - **ข้อจำกัด:** อ่านตัวพิมพ์เท่านั้น ไม่เก็บโครงสร้างตาราง ควรทดสอบกับเอกสารจริงของคุณก่อนใช้งาน
 
 เป็นงานพอร์ตอิสระ ไม่ได้เกี่ยวข้องหรือได้รับการรับรองจาก iApp Technology
