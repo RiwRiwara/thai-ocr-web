@@ -140,6 +140,29 @@ JPEG 2000 images, and for PDFs without embedded fonts, serve pdf.js's `wasm/`, `
 and pass `{ wasmUrl, cMapUrl, cMapPacked: true, standardFontDataUrl }` (the demo does this). A text layer whose Thai
 characters did not survive (unmapped glyphs, broken mark order) is not trusted: that page is OCR'd instead.
 
+### Node.js and the command line
+
+```bash
+npm install -g thai-ocr-web onnxruntime-node pdfjs-dist @napi-rs/canvas
+thai-ocr-web scan.png                    # text to stdout
+thai-ocr-web contract.pdf --json         # text, lines, boxes and confidence
+thai-ocr-web ./scans -r -o ./text        # a folder, one .txt per file
+```
+
+`onnxruntime-node` runs the models natively (about 0.5 s a page on 8 CPU threads); without it the CLI falls back to
+the WASM build on one thread. `pdfjs-dist` reads PDFs and `@napi-rs/canvas` renders their scanned pages; install
+`sharp` to read WebP, TIFF or HEIC. All of these are optional. In code:
+
+```js
+import { createThaiOCR, readImageFile, readPdfFile } from "thai-ocr-web/node";
+
+const ocr = await createThaiOCR();                       // models load from the package itself
+const { text, lines } = await ocr.read(await readImageFile("scan.jpg"));
+for await (const page of readPdfFile(ocr, "doc.pdf")) console.log(page.pageNumber, page.source, page.text);
+```
+
+The Node entry gives the same text as the reference runtime on every test page too (`npm test`).
+
 ### Core API (any JavaScript runtime)
 
 `LineOCR` takes its dependencies as arguments, so it also runs in Node or a custom setup:
@@ -181,6 +204,7 @@ front, which iOS refuses with "RangeError: Out of memory". All test pages read w
 | `src/line-ocr.js` | the runtime: detection, recognition, orientation, reading order, filters |
 | `src/thai-norm.js` | Thai canonical form (mark order, sara am, legacy code points) |
 | `src/browser.js` | `createThaiOCR()`: loads ONNX Runtime Web, OpenCV.js and the models (cached) |
+| `src/node.js`, `bin/` | `thai-ocr-web/node` and the `thai-ocr-web` command (onnxruntime-node) |
 | `src/pdf.js` | `readPdf()`: a PDF's own text where it has one, OCR for scanned pages (pdf.js) |
 | `vendor/opencv/` | the minimal OpenCV.js build and the script that rebuilds it |
 | `models/` | OpenThai 2.1 OCR Text models (v2.1.4), unchanged |
@@ -196,7 +220,7 @@ front, which iOS refuses with "RangeError: Out of memory". All test pages read w
 ```bash
 npm install
 npm run dev        # demo at http://localhost:5173
-npm test           # parity with the reference runtime (11 pages, ONNX Runtime Web WASM in Node) + PDF text layer
+npm test           # parity with the reference runtime (11 pages; WASM, and onnxruntime-node) + PDFs
 npm run build      # static site in dist/
 ```
 
@@ -238,6 +262,7 @@ filters. Use the package, or [`src/line-ocr.js`](src/line-ocr.js) as the referen
 
 - [x] PDF input (pdf.js)
 - [x] npm package
+- [x] Node.js and a command-line tool
 - [ ] Searchable-PDF output (text layer over scanned pages)
 - [ ] Word boxes (the reference runtime's `words`)
 - [ ] Several workers for batches of pages
@@ -273,6 +298,7 @@ Apache-2.0 — see [LICENSE](LICENSE) and [NOTICE](NOTICE).
 - **เร็ว:** ประมาณ 0.2–0.4 วินาที/หน้า ด้วย WebGPU บน Mac mini และใช้ WASM ได้ทุก browser รวม iPhone
 - **ครบ:** หมุนหน้า 90°/180°, แก้เอียง, อ่านทีละคอลัมน์, ฟอนต์ไม่มีหัว (Kanit/Prompt), วรรณยุกต์ลอยของหนังสือเก่า, ทศนิยมคอมมา, กรองตราประทับ
 - **PDF:** หน้าที่มีข้อความอยู่ในไฟล์แล้วดึงข้อความตรง ๆ หน้าที่เป็นภาพสแกนจะ OCR ให้ (`thai-ocr-web/pdf`)
+- **ใช้บน Node / command line:** `npm i -g thai-ocr-web onnxruntime-node pdfjs-dist @napi-rs/canvas` แล้วสั่ง `thai-ocr-web scan.pdf` ได้เลย (อ่านทั้งโฟลเดอร์ได้ด้วย `-r -o ./text`)
 - **ใช้ในแอป:** `npm install thai-ocr-web onnxruntime-web` แล้วใช้ `createThaiOCR()` จาก `thai-ocr-web/browser` (ดูตัวอย่างด้านบน)
 - **ใช้แค่ไฟล์โมเดลได้ไหม:** ได้ แต่ไฟล์ `.onnx` ให้ผลเป็นตัวเลขดิบ ต้องมีขั้นตอนก่อนและหลัง (หาบรรทัด ตัดภาพ ถอดรหัส CTC เรียงลำดับการอ่าน) ซึ่งก็คือสิ่งที่แพ็กเกจนี้ทำ
 - **เอาไปทำอะไรได้:** รับเอกสารลูกค้าแบบไฟล์ไม่ออกจากเครื่อง (บัตรประชาชน สัญญา statement) · กรอกฟอร์มจากรูปใบแจ้งหนี้หรือใบเสร็จ ·

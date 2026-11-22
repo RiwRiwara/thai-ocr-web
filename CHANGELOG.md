@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.2.0 — 2026-11-22
+
+- Node.js: `thai-ocr-web/node` with `createThaiOCR()` (onnxruntime-node when installed, otherwise the WASM build),
+  `readImageFile()` (PNG and JPEG built in, other formats with `sharp`) and `readPdfFile()`. Same text as the
+  reference runtime on every test page (`test/node.mjs`, in `npm test`).
+- Command line: `thai-ocr-web <files or folders>` with `--json`, `--out`, `--ocr-all`, `--recursive`, `--threads`.
+- `readPdf()`: `createCanvas` option, so scanned pages can be rendered outside the browser (@napi-rs/canvas in Node).
+
 ## 0.1.1 — 2026-11-22
 
 - PDF: detect text layers whose Thai glyphs map to the wrong characters (e.g. "พ=ฒนา", "ด้<ย") and read those pages

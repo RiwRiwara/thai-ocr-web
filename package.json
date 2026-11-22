@@ -1,7 +1,7 @@
 {
   "name": "thai-ocr-web",
-  "version": "0.1.1",
-  "description": "Thai + English printed-text OCR in the browser (WebGPU / WASM), images and PDFs: a JavaScript port of OpenThai 2.1 OCR Text with output identical to the reference runtime",
+  "version": "0.2.0",
+  "description": "Thai + English printed-text OCR for the browser (WebGPU / WASM) and Node, images and PDFs: a JavaScript port of OpenThai 2.1 OCR Text with output identical to the reference runtime",
   "type": "module",
   "license": "Apache-2.0",
   "author": "Awirut",
@@ -26,8 +26,13 @@
     "openthai",
     "text-recognition",
     "pdf",
-    "pdfjs"
+    "pdfjs",
+    "cli",
+    "nodejs"
   ],
+  "bin": {
+    "thai-ocr-web": "bin/thai-ocr-web.mjs"
+  },
   "exports": {
     ".": {
       "types": "./src/index.d.ts",
@@ -36,6 +41,10 @@
     "./browser": {
       "types": "./src/browser.d.ts",
       "default": "./src/browser.js"
+    },
+    "./node": {
+      "types": "./src/node.d.ts",
+      "default": "./src/node.js"
     },
     "./pdf": {
       "types": "./src/pdf.d.ts",
@@ -48,6 +57,7 @@
   "types": "./src/index.d.ts",
   "files": [
     "src",
+    "bin",
     "vendor/opencv/opencv-ocr.mjs",
     "models",
     "NOTICE",
@@ -58,7 +68,7 @@
     "node": ">=20"
   },
   "scripts": {
-    "test": "node test/parity.mjs && node test/pdf.mjs",
+    "test": "node test/parity.mjs && node test/pdf.mjs && node test/node.mjs",
     "dev": "node scripts/prepare-demo.mjs && vite",
     "build": "node scripts/prepare-demo.mjs && vite build && node scripts/split-large-assets.mjs",
     "preview": "vite preview",
@@ -66,22 +76,37 @@
     "build:space": "npm run build && node scripts/build-hf-space.mjs"
   },
   "dependencies": {
-    "clipper-lib": "^6.4.2"
+    "clipper-lib": "^6.4.2",
+    "jpeg-js": "^0.4.4",
+    "pngjs": "^7.0.0"
   },
   "peerDependencies": {
     "onnxruntime-web": "^1.31.1",
-    "pdfjs-dist": ">=5"
+    "onnxruntime-node": "^1.31.1",
+    "pdfjs-dist": ">=5",
+    "@napi-rs/canvas": ">=0.1.60",
+    "sharp": ">=0.33"
   },
   "peerDependenciesMeta": {
+    "onnxruntime-node": {
+      "optional": true
+    },
     "pdfjs-dist": {
+      "optional": true
+    },
+    "@napi-rs/canvas": {
+      "optional": true
+    },
+    "sharp": {
       "optional": true
     }
   },
   "devDependencies": {
+    "@napi-rs/canvas": "^1.2.0",
     "coi-serviceworker": "^0.1.7",
+    "onnxruntime-node": "^1.31.1",
     "onnxruntime-web": "^1.31.1",
     "pdfjs-dist": "^6.5.438",
-    "pngjs": "^7.0.0",
     "vite": "^8.3.8"
   }
 }

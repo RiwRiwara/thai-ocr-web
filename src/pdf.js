@@ -26,13 +26,15 @@ import { invalidShare } from "./line-ocr.js";
  * @param {boolean} [o.renderTextPages=false]  also render pages that have a text layer (to show them); they still
  *   are not OCR'd
  * @param {(p: {pageNumber: number, pageCount: number}) => void} [o.onPage]  called before each page is processed
+ * @param {(width: number, height: number) => any} [o.createCanvas]  makes the canvas a scanned page is rendered on;
+ *   default OffscreenCanvas or a <canvas> (in Node, pass @napi-rs/canvas's createCanvas, as thai-ocr-web/node does)
  * @param {number} [o.maxPages=Infinity]
  * @param {AbortSignal} [o.signal]
  * @yields {{pageNumber, pageCount, source: "text-layer"|"ocr", text, result?, image?, width, height}}
  */
 export async function* readPdf(source, {
   read, workerSrc, pdfjs, documentOptions = {}, useTextLayer = true, minTextChars = 20, maxBrokenShare = 0.01,
-  targetLongSide = 2200, maxPages = Infinity, renderTextPages = false, onPage, signal,
+  targetLongSide = 2200, maxPages = Infinity, renderTextPages = false, onPage, createCanvas, signal,
 } = {}) {
   if (typeof read !== "function") throw new Error("thai-ocr-web/pdf: pass { read: (imageData) => ocr.read(imageData) }");
   const lib = pdfjs || (await import("pdfjs-dist"));
@@ -53,14 +55,14 @@ export async function* readPdf(source, {
           const text = textOf(await page.getTextContent());
           const chars = text.replace(/\s/g, "").length;
           if (chars >= minTextChars && brokenShare(text) <= maxBrokenShare) {
-            const image = renderTextPages ? await render(page, base, targetLongSide) : undefined;
+            const image = renderTextPages ? await render(page, base, targetLongSide, createCanvas) : undefined;
             yield { pageNumber: n, pageCount, source: "text-layer", text, image,
               width: image?.width ?? base.width, height: image?.height ?? base.height };
             continue;
           }
         }
         if (signal?.aborted) return;
-        const image = await render(page, base, targetLongSide);
+        const image = await render(page, base, targetLongSide, createCanvas);
         const result = await read(image);
         yield { pageNumber: n, pageCount, source: "ocr", text: result.text, result, image, width: image.width, height: image.height };
       } finally {
@@ -73,11 +75,12 @@ export async function* readPdf(source, {
 }
 
 /** Render one page to ImageData on white, about targetLongSide pixels on its long side. */
-async function render(page, base, targetLongSide) {
+async function render(page, base, targetLongSide, createCanvas) {
   const scale = Math.min(4, targetLongSide / Math.max(base.width, base.height));
   const viewport = page.getViewport({ scale });
   const w = Math.round(viewport.width), h = Math.round(viewport.height);
-  const canvas = typeof OffscreenCanvas !== "undefined" ? new OffscreenCanvas(w, h)
+  const canvas = createCanvas ? await createCanvas(w, h)
+    : typeof OffscreenCanvas !== "undefined" ? new OffscreenCanvas(w, h)
     : Object.assign(document.createElement("canvas"), { width: w, height: h });
   const ctx = canvas.getContext("2d", { willReadFrequently: true });
   ctx.fillStyle = "#ffffff"; // transparent PDF backgrounds read as white paper

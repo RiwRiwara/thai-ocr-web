@@ -33,6 +33,8 @@ export interface ReadPdfOptions {
   renderTextPages?: boolean;
   /** called before each page is processed */
   onPage?: (p: { pageNumber: number; pageCount: number }) => void;
+  /** makes the canvas a scanned page is rendered on (default OffscreenCanvas / <canvas>; in Node, @napi-rs/canvas) */
+  createCanvas?: (width: number, height: number) => unknown | Promise<unknown>;
   /** pixels on the long side for rendering scanned pages (default 2200) */
   targetLongSide?: number;
   maxPages?: number;
