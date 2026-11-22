@@ -1,5 +1,9 @@
 # thai-ocr-web
 
+[![Live demo](https://img.shields.io/badge/demo-live-2ea44f)](https://riwriwara.github.io/thai-ocr-web/)
+[![Deploy](https://github.com/RiwRiwara/thai-ocr-web/actions/workflows/pages.yml/badge.svg)](https://github.com/RiwRiwara/thai-ocr-web/actions/workflows/pages.yml)
+[![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE)
+
 **Thai + English printed-text OCR that runs entirely in the browser** — WebGPU or WebAssembly, no server, the
 image never leaves the device.
 
@@ -7,6 +11,8 @@ A JavaScript port of [OpenThai 2.1 OCR Text](https://huggingface.co/iapp/OpenTha
 iApp Technology: the 6.6 MB models run unchanged on [ONNX Runtime Web](https://onnxruntime.ai/), and the whole
 reference runtime (`line_engine.py` v2.1.4) is ported to JavaScript. **On every test page the output is identical,
 character for character, to the reference Python runtime.**
+
+**▶ Try it: <https://riwriwara.github.io/thai-ocr-web/>** — drop a photo or scan of a Thai document.
 
 > Unofficial port — not affiliated with or endorsed by iApp Technology.
 
@@ -54,9 +60,14 @@ Drop, paste or pick an image. `?backend=wasm` or `?threads=8` in the URL overrid
 npm run build      # static site in dist/
 ```
 
-Host `dist/` anywhere static. For multi-threaded WASM the host must send
-`Cross-Origin-Opener-Policy: same-origin` and `Cross-Origin-Embedder-Policy: require-corp`
-(`demo/public/_headers` does this on Cloudflare Pages). Without them it still works, on one thread.
+Host `dist/` anywhere static. Multi-threaded WASM needs the page to be cross-origin isolated
+(`Cross-Origin-Opener-Policy: same-origin`, `Cross-Origin-Embedder-Policy: require-corp`).
+`demo/public/_headers` sets them on Cloudflare Pages; on hosts that cannot send headers, such as GitHub Pages,
+the bundled [coi-serviceworker](https://github.com/gzuidhof/coi-serviceworker) adds them (the page reloads once on
+the first visit). Without isolation it still works, on one thread.
+
+Every push to `main` runs the parity test, builds the demo and deploys it to GitHub Pages
+(`.github/workflows/pages.yml`).
 
 ## Use it in your app
 
@@ -154,7 +165,7 @@ Apache-2.0 — see [LICENSE](LICENSE) and [NOTICE](NOTICE).
 - Models and reference runtime: [OpenThai 2.1 OCR Text](https://huggingface.co/iapp/OpenThai2.1-OCR-Text-20261118),
   iApp Technology (Apache-2.0), built on PaddlePaddle PP-OCRv6-tiny (Apache-2.0).
 - [OpenCV](https://opencv.org/) (Apache-2.0), [ONNX Runtime Web](https://onnxruntime.ai/) (MIT),
-  [Clipper](https://www.npmjs.com/package/clipper-lib) (Boost).
+  [Clipper](https://www.npmjs.com/package/clipper-lib) (Boost), [coi-serviceworker](https://github.com/gzuidhof/coi-serviceworker) (MIT, demo only).
 
 ---
 
@@ -166,6 +177,7 @@ OCR ภาษาไทย + อังกฤษ (ตัวพิมพ์) ที
 
 - เร็ว: ~0.2 วินาที/หน้า (WebGPU) หรือ ~0.4 วินาที/หน้า (WASM) บน Mac mini
 - ครบ: หมุนหน้า 90°/180°, แก้เอียง, อ่านทีละคอลัมน์, ฟอนต์ไม่มีหัว (Kanit/Prompt), วรรณยุกต์ลอยของหนังสือเก่า, ทศนิยมคอมมา, กรองตราประทับ
+- ลองเลย: <https://riwriwara.github.io/thai-ocr-web/>
 - ใช้: `npm install && npm run dev` สำหรับ demo หรือ `createThaiOCR()` จาก `thai-ocr-web/browser` ในแอปของคุณ
 - ข้อจำกัด: อ่านตัวพิมพ์เท่านั้น ไม่เก็บโครงสร้างตาราง ควรทดสอบกับเอกสารจริงของคุณก่อนใช้งาน
 

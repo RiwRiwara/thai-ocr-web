@@ -6,3 +6,4 @@ vendor/opencv/build/.build/
 .DS_Store
 *.log
 .vite/
+demo/public/coi-serviceworker.min.js

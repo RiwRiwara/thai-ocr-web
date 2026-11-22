@@ -3,6 +3,9 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- GitHub Pages cannot send COOP/COEP headers; this service worker adds them so WASM can use threads.
+       It does nothing when the host already sends them (Cloudflare Pages, Vite dev server). -->
+  <script src="coi-serviceworker.min.js"></script>
   <title>thai-ocr-web — Thai OCR in your browser</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ctext y=%22.9em%22 font-size=%2290%22%3E%E0%B8%81%3C/text%3E%3C/svg%3E" />
   <style>
@@ -24,7 +27,7 @@
 </head>
 <body>
   <h1>Thai OCR that runs entirely in your browser</h1>
-  <div class="muted">Images never leave this device. Model: <a href="https://huggingface.co/iapp/OpenThai2.1-OCR-Text-20261118">OpenThai 2.1 OCR Text</a> by iApp Technology (Apache-2.0) · unofficial port · <a href="https://github.com/">source</a> · <a href="THIRD_PARTY_LICENSES.txt">licenses</a></div>
+  <div class="muted">Images never leave this device. Model: <a href="https://huggingface.co/iapp/OpenThai2.1-OCR-Text-20261118">OpenThai 2.1 OCR Text</a> by iApp Technology (Apache-2.0) · unofficial port · <a href="https://github.com/RiwRiwara/thai-ocr-web">source</a> · <a href="THIRD_PARTY_LICENSES.txt">licenses</a></div>
   <div class="bar">
     <label>Backend
       <select id="ep"><option value="webgpu">WebGPU (fallback WASM)</option><option value="wasm">WASM</option></select>
