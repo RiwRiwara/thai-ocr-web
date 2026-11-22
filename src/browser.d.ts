@@ -2,6 +2,8 @@ import type { ConfigOverrides, LineOCR } from "./index.js";
 export * from "./index.js";
 
 export declare const MODEL_FILES: string[];
+/** True on iPhone / iPad, where createThaiOCR defaults to one WASM thread. */
+export declare function isAppleMobile(): boolean;
 
 export interface BrowserOptions {
   /** URL of the folder that holds the model files. Default "models/". */

@@ -21,7 +21,7 @@ const require = createRequire(import.meta.url);
 globalThis.require ??= require;
 globalThis.__dirname ??= path.join(root, "vendor", "opencv");
 globalThis.__filename ??= path.join(root, "vendor", "opencv", "opencv-ocr.mjs");
-const cv = await (await import("../vendor/opencv/opencv-ocr.mjs")).default;
+const cv = await (await import("../vendor/opencv/opencv-ocr.mjs")).default();
 const ClipperLib = require("clipper-lib");
 ort.env.wasm.numThreads = 1;
 

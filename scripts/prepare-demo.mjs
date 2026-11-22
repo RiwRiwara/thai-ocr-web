@@ -11,6 +11,12 @@ for (const f of fs.readdirSync(path.join(root, "models"))) {
   fs.copyFileSync(path.join(root, "models", f), path.join(pub, "models", f));
 }
 
+// sample pages for the demo's "try a sample" buttons
+fs.mkdirSync(path.join(pub, "samples"), { recursive: true });
+for (const f of fs.readdirSync(path.join(root, "test", "pages"))) {
+  fs.copyFileSync(path.join(root, "test", "pages", f), path.join(pub, "samples", f));
+}
+
 // GitHub Pages: service worker that adds the cross-origin isolation headers (see demo/index.html)
 fs.copyFileSync(path.join(root, "node_modules", "coi-serviceworker", "coi-serviceworker.min.js"),
   path.join(pub, "coi-serviceworker.min.js"));

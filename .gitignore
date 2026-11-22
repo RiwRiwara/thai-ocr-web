@@ -7,3 +7,4 @@ vendor/opencv/build/.build/
 *.log
 .vite/
 demo/public/coi-serviceworker.min.js
+demo/public/samples/
