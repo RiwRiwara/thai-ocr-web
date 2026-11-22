@@ -27,5 +27,19 @@ jobs:
       - run: npm ci
       - name: Tag matches package.json
         run: test "v$(node -p 'require("./package.json").version')" = "${GITHUB_REF_NAME}"
+      - name: Check npm
+        id: npm
+        run: |
+          name=$(node -p 'require("./package.json").name'); version=$(node -p 'require("./package.json").version')
+          if ! npm view "$name" name >/dev/null 2>&1; then
+            echo "::notice::$name is not on npm yet. Publish the first version by hand (npm publish), then set up trusted publishing."
+            echo "publish=false" >> "$GITHUB_OUTPUT"
+          elif npm view "$name@$version" version >/dev/null 2>&1; then
+            echo "::notice::$name@$version is already on npm."
+            echo "publish=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "publish=true" >> "$GITHUB_OUTPUT"
+          fi
       - run: npm test
-      - run: npm publish --access public
+      - if: steps.npm.outputs.publish == 'true'
+        run: npm publish --access public
