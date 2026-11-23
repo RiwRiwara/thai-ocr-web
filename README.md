@@ -104,7 +104,15 @@ const ocr = await createThaiOCR({
   backend: "webgpu",          // falls back to WASM when the device has no WebGPU
 });
 
-const result = await ocr.read(ctx.getImageData(0, 0, width, height));
+// ocr.read() takes RGBA pixels (ImageData). To get them, draw the image on a canvas:
+// file = a File or Blob (from <input type="file">, drag and drop, fetch); createImageBitmap() also takes
+// an <img>, a <canvas> or a <video> frame.
+const bitmap = await createImageBitmap(file);
+const canvas = new OffscreenCanvas(bitmap.width, bitmap.height);
+const ctx = canvas.getContext("2d");
+ctx.drawImage(bitmap, 0, 0);
+
+const result = await ocr.read(ctx.getImageData(0, 0, canvas.width, canvas.height));
 result.text;       // the page's text in reading order
 result.lines;      // [{ text, confidence, row, box: [[x, y] × 4] }] in image coordinates
 result.dropped;    // lines filtered out (stamps, signatures, specks) and why
