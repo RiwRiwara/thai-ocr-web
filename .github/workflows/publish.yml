@@ -17,13 +17,15 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 24
           registry-url: https://registry.npmjs.org
-          cache: npm
-      - run: npm install -g npm@latest
+          # no dependency cache in the release job: a poisoned cache must not reach what gets published
+      - run: npm install -g npm@11   # trusted publishing needs npm 11.5.1 or later
       - run: npm ci
       - name: Tag matches package.json
         run: test "v$(node -p 'require("./package.json").version')" = "${GITHUB_REF_NAME}"
